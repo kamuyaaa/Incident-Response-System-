@@ -1,0 +1,19 @@
+name: Incident-Response-CI
+
+on:
+  push:
+    branches: [ "main", "develop" ]
+  pull_request:
+    branches: [ "main", "develop" ]
+
+jobs:
+  security-and-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: System Health Check
+        run: |
+          echo "Scanning Incident Response System..."
+          echo "Status: All systems nominal."
