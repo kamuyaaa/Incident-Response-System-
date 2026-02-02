@@ -1,3 +1,6 @@
+# Incident-Response-System-
+An incident response management system developed collaboratively, featuring automated workflows, role-based access, and a CI/CD pipeline for continuous integration and deployment.
+
 # Incident Response Management System
 
 ## Overview
@@ -22,6 +25,9 @@ To support teamwork and code quality, the project integrates a **CI/CD pipeline*
 - **Backend:** Node.js / Express *(adjust if different)*
 - **Frontend:** HTML, CSS, JavaScript *(or React if applicable)*
 - **Database:** MongoDB *(or your choice)*
+- **Backend:** Node.js / Express 
+- **Frontend:** React
+- **Database:** MongoDB 
 - **Version Control:** Git & GitHub
 - **CI/CD:** GitHub Actions
 - **Deployment:** Render / Railway / Vercel
@@ -37,6 +43,7 @@ The project uses **GitHub Actions** to:
 This pipeline helps the team collaborate efficiently and reduces integration errors.
 
 
+
 ## Branching Strategy
 - `main` – Stable production-ready code
 - `develop` – Active development branch
@@ -49,4 +56,4 @@ Direct commits to `main` are not allowed.
 ## Installation & Setup
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-username/incident-response-system.git
+   git clone https://github.com/kamuyaaa/Incident-Response-System-.git
