@@ -3,8 +3,7 @@
 ## Overview
 This project is a collaborative group system designed to support effective **incident response and management**.  
 The system allows incidents to be reported, tracked, analyzed, and resolved while ensuring accountability, security, and timely response.
-
-To support teamwork and code quality, the project integrates a **CI/CD pipeline** that automates testing and deployment.
+To support teamwork and code quality, the project integrates a CI/CD pipeline that automates testing and deployment.
 
 ---
 
