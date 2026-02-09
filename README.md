@@ -1,7 +1,9 @@
 **Incident Response System**
+
 An incident response management system developed collaboratively, featuring automated workflows, role-based access control, and a CI/CD pipeline for continuous integration and deployment.
 
 **Overview**
+
 The Incident Response System is a collaborative platform designed to support structured and secure incident management.
 The system enables teams to:
 Report incidents in real time
@@ -11,6 +13,7 @@ Maintain accountability and secure data handling
 The project follows industry-standard DevOps practices by integrating a CI/CD pipeline to ensure reliability, code quality, and smooth deployment.
 
 **Features**
+
 Incident reporting and tracking
 Role-based access control (Administrator, Responder)
 Incident status updates and escalation
@@ -19,13 +22,14 @@ Secure data handling and authentication
 Automated testing and deployment (CI/CD)
 
 **Technology Stack**
+
 Layer	Technology Used
 Frontend	React
 Backend	Node.js / Express
 Database	MongoDB
 Version Control	Git & GitHub
 CI/CD	GitHub Actions
-Deployment	Render / Railway / Vercel
+Deployment	Render 
 CI/CD Pipeline
 
 This project implements a CI/CD (Continuous Integration and Continuous Deployment) pipeline using GitHub Actions to automate testing, validation, and deployment of the system.
@@ -33,6 +37,7 @@ This project implements a CI/CD (Continuous Integration and Continuous Deploymen
 The goal of this pipeline is to reduce human error, maintain code quality, and ensure that the production system remains stable and reliable.
 
 **Continuous Integration (CI)**
+
 The Continuous Integration process ensures that every code change is automatically tested before being merged.
 When a developer:
 Pushes code to a branch
