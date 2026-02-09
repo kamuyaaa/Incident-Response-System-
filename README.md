@@ -9,6 +9,7 @@ The system allows incidents to be reported, tracked, analyzed, and resolved whil
 
 To support teamwork and code quality, the project integrates a **CI/CD pipeline** that automates testing and deployment.
 
+---
 
 ## Features
 - Incident reporting and tracking
@@ -21,6 +22,9 @@ To support teamwork and code quality, the project integrates a **CI/CD pipeline*
 ---
 
 ## Technology Stack
+- **Backend:** Node.js / Express *(adjust if different)*
+- **Frontend:** HTML, CSS, JavaScript *(or React if applicable)*
+- **Database:** MongoDB *(or your choice)*
 - **Backend:** Node.js / Express 
 - **Frontend:** React
 - **Database:** MongoDB 
@@ -28,6 +32,7 @@ To support teamwork and code quality, the project integrates a **CI/CD pipeline*
 - **CI/CD:** GitHub Actions
 - **Deployment:** Render / Railway / Vercel
 
+---
 
 ## CI/CD Pipeline
 The project uses **GitHub Actions** to:
@@ -46,6 +51,7 @@ This pipeline helps the team collaborate efficiently and reduces integration err
 
 Direct commits to `main` are not allowed.
 
+---
 
 ## Installation & Setup
 1. Clone the repository:
