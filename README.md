@@ -78,7 +78,7 @@ feature/*	Feature-specific development branches
 All changes must go through Pull Requests and pass CI checks before merging.
 
 **Installation & Setup**
-1️⃣ Clone the Repository
+1️. Clone the Repository
 git clone https://github.com/kamuyaaa/Incident-Response-System-.git
 cd Incident-Response-System-
 
