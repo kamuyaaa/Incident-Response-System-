@@ -58,6 +58,17 @@ Direct commits to `main` are not allowed.
 
 ---
 
+## Frontend (demo mode)
+The frontend can run standalone with no backend. All data is stored in the browser (localStorage).
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Open the app and use the **demo role** switch in the header or menu (Reporter / Admin / Responder) to try each view. Use **Reset Demo Data** in the menu to restore seed data.
+
 ## Installation & Setup
 1. Clone the repository:
    ```bash
