@@ -2,11 +2,17 @@ import type { Incident } from '../types/incident'
 import type { User } from '../types/user'
 import { write, setStorageVersion, getStorageVersion } from './storage'
 
-const STORAGE_VERSION = 1
+const STORAGE_VERSION = 2
 
 const INCIDENTS_KEY = 'incidents'
 const USERS_KEY = 'users'
 const NOTIFICATIONS_KEY = 'notifications'
+
+function seedTimeline(incidentId: string, status: string, reportedAt: string) {
+  return [
+    { id: `te-${incidentId}-1`, time: reportedAt, actorName: 'Reporter', actorRole: 'REPORTER', type: 'reported' as const, message: 'Incident reported.', newStatus: status as Incident['status'] },
+  ]
+}
 
 const SEED_INCIDENTS: Incident[] = [
   {
@@ -24,6 +30,8 @@ const SEED_INCIDENTS: Incident[] = [
     casualties: '1 person',
     internalNotes: [],
     timelineUpdates: [],
+    timeline: seedTimeline('10003', 'Reported', '2026-02-13T14:45:00Z'),
+    updatedAt: '2026-02-13T14:45:00Z',
   },
   {
     id: '10002',
@@ -107,10 +115,12 @@ const SEED_INCIDENTS: Incident[] = [
     status: 'Reported',
     priority: 'Medium',
     reportedAt: '2026-02-13T15:10:00Z',
-    assignedToId: null,
-    assignedToName: null,
+    assignedToId: 'resp-1',
+    assignedToName: 'Responder User',
     internalNotes: [],
     timelineUpdates: [],
+    timeline: seedTimeline('10005', 'Reported', '2026-02-13T15:10:00Z'),
+    updatedAt: '2026-02-13T15:10:00Z',
   },
   {
     id: '10004',
@@ -160,6 +170,7 @@ const SEED_USERS: User[] = [
   { id: 'u1', email: 'admin@example.com', name: 'Jane Admin', role: 'admin', enabled: true },
   { id: 'u2', email: 'admin2@example.com', name: 'Mary Admin', role: 'admin', enabled: true },
   { id: 'u3', email: 'reporter@example.com', name: 'John Reporter', role: 'reporter', enabled: true },
+  { id: 'resp-1', email: 'responder@example.com', name: 'Responder User', role: 'responder', enabled: true },
   { id: 'u4', email: 'jack@responder.com', name: 'Jack Doe', role: 'responder', enabled: true },
   { id: 'u5', email: 'peter@responder.com', name: 'Peter Mark', role: 'responder', enabled: true },
   { id: 'u6', email: 'sarah@responder.com', name: 'Sarah Lee', role: 'responder', enabled: false },
@@ -180,7 +191,7 @@ export function seedData(): void {
   setStorageVersion(STORAGE_VERSION)
 }
 
-const STORAGE_VERSION_CURRENT = 1 as const
+const STORAGE_VERSION_CURRENT = 2 as const
 
 export function ensureSchemaVersion(): void {
   const v = getStorageVersion()

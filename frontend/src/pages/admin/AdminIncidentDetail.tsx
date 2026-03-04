@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
+import { useAuth } from '../../context/AuthContext'
 import { getIncident, updateIncident, assignIncident, addIncidentNote, getUsers } from '../../services'
 import type { Incident, IncidentStatus, IncidentPriority } from '../../types/incident'
 import type { User } from '../../types/user'
 import LoadingSpinner from '../../components/LoadingSpinner'
 import ErrorState from '../../components/ErrorState'
 import StatusBadge from '../../components/StatusBadge'
+import ProgressTimeline from '../../components/ProgressTimeline'
 import { MapPin } from 'lucide-react'
 import { useToast } from '../../context/ToastContext'
 
@@ -23,7 +25,9 @@ const STATUS_OPTIONS: IncidentStatus[] = [
 
 export default function AdminIncidentDetail() {
   const { id } = useParams<{ id: string }>()
+  const { user } = useAuth()
   const toast = useToast()
+  const actor = user ? { name: user.name, role: user.role } : undefined
   const [incident, setIncident] = useState<Incident | null>(null)
   const [responders, setResponders] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
@@ -69,7 +73,7 @@ export default function AdminIncidentDetail() {
     const assigneeUser = responders.find((u) => u.id === assignee)
     setSaving(true)
     try {
-      await assignIncident(id, { assigneeId: assignee }, assigneeUser?.name)
+      await assignIncident(id, { assigneeId: assignee }, assigneeUser?.name, actor)
       const updated = await getIncident(id)
       setIncident(updated)
       setAssigneeId(updated.assignedToId || '')
@@ -85,7 +89,7 @@ export default function AdminIncidentDetail() {
     if (!id) return
     setSaving(true)
     try {
-      const updated = await updateIncident(id, { priority })
+      const updated = await updateIncident(id, { priority }, actor)
       setIncident(updated)
       toast('Priority updated.', 'success')
     } catch (e) {
@@ -99,7 +103,7 @@ export default function AdminIncidentDetail() {
     if (!id) return
     setSaving(true)
     try {
-      const updated = await updateIncident(id, { status: newStatus })
+      const updated = await updateIncident(id, { status: newStatus }, actor)
       setIncident(updated)
       setStatus(newStatus)
       toast('Status updated.', 'success')
@@ -165,6 +169,11 @@ export default function AdminIncidentDetail() {
           <p className="text-sm text-gray-500 mt-1">Casualties: {incident.casualties}</p>
         )}
         <p className="text-xs text-gray-400 mt-2">Incident Id: #{incident.id}</p>
+      </div>
+
+      <div className="bg-white rounded-xl p-4 border border-gray-100 surface-shadow">
+        <h3 className="font-semibold text-black mb-3">Progress</h3>
+        <ProgressTimeline incident={incident} />
       </div>
 
       <div className="bg-white rounded-xl p-4 border border-gray-100 surface-shadow space-y-4">

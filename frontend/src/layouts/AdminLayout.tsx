@@ -1,9 +1,10 @@
 import { Link, Outlet, useLocation } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
 import HamburgerButton from '../components/HamburgerButton'
 import NotificationBell from '../components/NotificationBell'
-import RoleSelector from '../components/RoleSelector'
 
 export default function AdminLayout() {
+  const { user } = useAuth()
   const location = useLocation()
   const isDashboard = location.pathname === '/admin'
 
@@ -28,7 +29,7 @@ export default function AdminLayout() {
         </h1>
         <div className="flex items-center gap-1">
           <NotificationBell />
-          <RoleSelector />
+          <span className="text-xs text-gray-500 truncate max-w-[70px]" title={user?.email}>{user?.email}</span>
           <HamburgerButton />
         </div>
       </header>

@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
+import { useAuth } from '../../context/AuthContext'
 import { getIncident, updateIncident, addTimelineUpdate } from '../../services'
 import type { Incident, IncidentStatus } from '../../types/incident'
 import LoadingSpinner from '../../components/LoadingSpinner'
 import ErrorState from '../../components/ErrorState'
 import StatusBadge from '../../components/StatusBadge'
+import ProgressTimeline from '../../components/ProgressTimeline'
 import { useToast } from '../../context/ToastContext'
 import { MapPin } from 'lucide-react'
 
@@ -12,7 +14,9 @@ const RESPONDER_STATUSES: IncidentStatus[] = ['En route', 'On site', 'In Progres
 
 export default function ResponderAssignmentDetail() {
   const { id } = useParams<{ id: string }>()
+  const { user } = useAuth()
   const toast = useToast()
+  const actor = user ? { name: user.name, role: user.role } : undefined
   const [incident, setIncident] = useState<Incident | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -38,7 +42,7 @@ export default function ResponderAssignmentDetail() {
     if (!id) return
     setSaving(true)
     try {
-      const updated = await updateIncident(id, { status: newStatus })
+      const updated = await updateIncident(id, { status: newStatus }, actor)
       setIncident(updated)
       toast('Status updated.', 'success')
     } catch (e) {
@@ -56,7 +60,7 @@ export default function ResponderAssignmentDetail() {
     if (!id) return
     setSaving(true)
     try {
-      await addTimelineUpdate(id, { text: updateText.trim() })
+      await addTimelineUpdate(id, { text: updateText.trim() }, actor)
       const updated = await getIncident(id)
       setIncident(updated)
       setUpdateText('')
@@ -103,6 +107,11 @@ export default function ResponderAssignmentDetail() {
           {incident.location}
         </p>
         <p className="text-xs text-gray-400 mt-2">Incident Id: #{incident.id}</p>
+      </div>
+
+      <div className="bg-white rounded-xl p-4 border border-gray-100 surface-shadow">
+        <h3 className="font-semibold text-black mb-3">Progress</h3>
+        <ProgressTimeline incident={incident} />
       </div>
 
       <div className="bg-white rounded-xl p-4 border border-gray-100 surface-shadow space-y-4">

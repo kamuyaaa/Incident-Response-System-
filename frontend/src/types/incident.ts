@@ -25,6 +25,27 @@ export interface TimelineUpdate {
   createdAt: string
 }
 
+export type TimelineEntryType =
+  | 'reported'
+  | 'validated'
+  | 'dispatched'
+  | 'assigned'
+  | 'status_change'
+  | 'progress_update'
+  | 'escalated'
+  | 'resolved'
+  | 'comment'
+
+export interface TimelineEntry {
+  id: string
+  time: string
+  actorName: string
+  actorRole: string
+  type: TimelineEntryType
+  message: string
+  newStatus?: IncidentStatus
+}
+
 export interface Incident {
   id: string
   type: string
@@ -43,6 +64,7 @@ export interface Incident {
   reporterId?: string
   internalNotes?: InternalNote[]
   timelineUpdates?: TimelineUpdate[]
+  timeline?: TimelineEntry[]
 }
 
 export interface GetIncidentsParams {

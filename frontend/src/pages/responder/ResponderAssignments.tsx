@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { useDemoRole } from '../../context/DemoRoleContext'
-import { getIncidents, getUsers } from '../../services'
+import { useAuth } from '../../context/AuthContext'
+import { getIncidents } from '../../services'
 import type { Incident } from '../../types/incident'
-import type { User } from '../../types/user'
 import LoadingSpinner from '../../components/LoadingSpinner'
 import ErrorState from '../../components/ErrorState'
 import EmptyState from '../../components/EmptyState'
@@ -11,33 +10,14 @@ import StatusBadge from '../../components/StatusBadge'
 import { MapPin } from 'lucide-react'
 
 export default function ResponderAssignments() {
-  const { currentResponderId, setCurrentResponderId } = useDemoRole()
+  const { user } = useAuth()
   const [incidents, setIncidents] = useState<Incident[]>([])
-  const [responders, setResponders] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    let cancelled = false
-    async function load() {
-      try {
-        const users = await getUsers({ role: 'responder' })
-        const enabled = users.filter((u) => u.enabled !== false)
-        if (!cancelled) setResponders(enabled)
-      } catch {
-        if (!cancelled) setResponders([])
-      }
-    }
-    load()
-    return () => { cancelled = true }
-  }, [])
-
-  useEffect(() => {
-    if (responders.length > 0 && !currentResponderId) {
-      setCurrentResponderId(responders[0].id)
-      return
-    }
-    if (!currentResponderId) {
+    const userId = user?.id
+    if (!userId) {
       setIncidents([])
       setLoading(false)
       return
@@ -45,43 +25,17 @@ export default function ResponderAssignments() {
     let cancelled = false
     setLoading(true)
     setError(null)
-    getIncidents({ assignedTo: currentResponderId, limit: 50 })
+    getIncidents({ assignedTo: userId, limit: 50 })
       .then((res) => { if (!cancelled) setIncidents(res.data) })
       .catch((e) => { if (!cancelled) setError((e as Error).message) })
       .finally(() => { if (!cancelled) setLoading(false) })
     return () => { cancelled = true }
-  }, [currentResponderId])
+  }, [user?.id])
 
-  if (loading && !currentResponderId && responders.length > 0) {
+  if (loading) {
     return (
       <div className="flex justify-center py-16">
         <LoadingSpinner />
-      </div>
-    )
-  }
-
-  if (!currentResponderId) {
-    return (
-      <div className="p-4">
-        <EmptyState
-          title="Select a responder"
-          description="Choose which responder you are in the menu or below to see their assignments."
-        />
-        {responders.length > 0 && (
-          <div className="mt-4 space-y-2">
-            <p className="text-sm font-medium text-gray-700">Select current responder:</p>
-            <select
-              value={currentResponderId}
-              onChange={(e) => setCurrentResponderId(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-white text-sm"
-            >
-              <option value="">Choose...</option>
-              {responders.map((u) => (
-                <option key={u.id} value={u.id}>{u.name}</option>
-              ))}
-            </select>
-          </div>
-        )}
       </div>
     )
   }
@@ -94,27 +48,10 @@ export default function ResponderAssignments() {
     )
   }
 
-  const currentResponder = responders.find((r) => r.id === currentResponderId)
-
   return (
     <div className="p-4 space-y-4">
-      {responders.length > 1 && (
-        <div>
-          <label htmlFor="responder-select" className="block text-sm font-medium text-gray-700 mb-1">Current responder</label>
-          <select
-            id="responder-select"
-            value={currentResponderId}
-            onChange={(e) => setCurrentResponderId(e.target.value)}
-            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-white text-sm"
-          >
-            {responders.map((u) => (
-              <option key={u.id} value={u.id}>{u.name}</option>
-            ))}
-          </select>
-        </div>
-      )}
       <p className="text-black/70 text-sm">
-        {currentResponder ? `Hi ${currentResponder.name}, here are your assigned incidents.` : 'Your assigned incidents.'}
+        Hi {user?.name}, here are your assigned incidents.
       </p>
       {incidents.length === 0 ? (
         <EmptyState

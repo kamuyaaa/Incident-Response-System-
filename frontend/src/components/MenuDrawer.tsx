@@ -1,20 +1,19 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useMenu } from '../context/MenuContext'
-import { useDemoRole } from '../context/DemoRoleContext'
+import { useAuth } from '../context/AuthContext'
 import { seedData } from '../mock/seed'
-import RoleSelector from './RoleSelector'
+import { authService } from '../mock/auth.service'
 
 const REPORTER_NAV = [
-  { to: '/report/type', label: 'Report an incident' },
-  { to: '/reports/mine', label: 'Reported by you' },
-  { to: '/reports/others', label: 'Reported by others' },
+  { to: '/incidents/new', label: 'Report Incident' },
+  { to: '/incidents', label: 'My Incidents' },
 ] as const
 
 const ADMIN_NAV = [
   { to: '/admin', label: 'Dashboard' },
-  { to: '/admin/incidents', label: 'Total Incidents' },
+  { to: '/admin/incidents', label: 'Incidents' },
   { to: '/admin/incidents?status=In Progress', label: 'In Progress' },
-  { to: '/admin/incidents?status=Completed', label: 'Completed Incidents' },
+  { to: '/admin/incidents?status=Completed', label: 'Completed' },
   { to: '/admin/responders', label: 'Responders' },
 ] as const
 
@@ -22,21 +21,28 @@ const RESPONDER_NAV = [{ to: '/responder', label: 'My Assignments' }] as const
 
 export default function MenuDrawer() {
   const { isOpen, closeMenu } = useMenu()
-  const { role } = useDemoRole()
+  const { user, logout } = useAuth()
   const location = useLocation()
   const navigate = useNavigate()
 
   const navItems =
-    role === 'ADMIN'
+    user?.role === 'ADMIN'
       ? ADMIN_NAV
-      : role === 'RESPONDER'
+      : user?.role === 'RESPONDER'
         ? RESPONDER_NAV
         : REPORTER_NAV
 
+  const handleLogout = () => {
+    logout()
+    closeMenu()
+    navigate('/login', { replace: true })
+  }
+
   const handleResetDemo = () => {
     seedData()
+    authService.logout()
     closeMenu()
-    navigate('/', { replace: true })
+    navigate('/login', { replace: true })
     window.location.reload()
   }
 
@@ -67,10 +73,13 @@ export default function MenuDrawer() {
             </svg>
           </button>
         </div>
-        <div className="p-4 border-b border-gray-100">
-          <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Demo role</p>
-          <RoleSelector />
-        </div>
+        {user && (
+          <div className="p-4 border-b border-gray-100">
+            <p className="font-medium text-black truncate">{user.name}</p>
+            <p className="text-sm text-gray-500 truncate">{user.email}</p>
+            <p className="text-xs text-gray-400 mt-0.5">{user.role}</p>
+          </div>
+        )}
         <nav className="p-4 flex flex-col gap-1 flex-1 overflow-auto" aria-label="Main">
           {navItems.map(({ to, label }) => {
             const basePath = to.split('?')[0]
@@ -94,12 +103,21 @@ export default function MenuDrawer() {
           })}
         </nav>
         <div className="p-4 border-t border-gray-100 space-y-1">
+          {user?.role === 'ADMIN' && (
+            <button
+              type="button"
+              onClick={handleResetDemo}
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-amber-700 font-medium hover:bg-amber-50 border border-amber-200 transition-colors"
+            >
+              Reset Demo Data
+            </button>
+          )}
           <button
             type="button"
-            onClick={handleResetDemo}
-            className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-amber-700 font-medium hover:bg-amber-50 border border-amber-200 transition-colors"
+            onClick={handleLogout}
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-red-600 font-medium hover:bg-red-50 border border-red-100 transition-colors"
           >
-            Reset Demo Data
+            Logout
           </button>
         </div>
       </aside>

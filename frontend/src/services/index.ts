@@ -22,12 +22,17 @@ export async function createIncident(payload: {
   location: string
   casualties?: string
   reporterId?: string
+  reporterName?: string
 }) {
   return incidentsService.createIncident(payload)
 }
 
-export async function updateIncident(id: string, payload: Parameters<typeof incidentsService.updateIncident>[1]) {
-  const inc = await incidentsService.updateIncident(id, payload)
+export async function updateIncident(
+  id: string,
+  payload: Parameters<typeof incidentsService.updateIncident>[1],
+  actor?: { name: string; role: string }
+) {
+  const inc = await incidentsService.updateIncident(id, payload, actor)
   if (!inc) {
     const err = new Error('Incident not found') as Error & { status?: number }
     err.status = 404
@@ -36,8 +41,13 @@ export async function updateIncident(id: string, payload: Parameters<typeof inci
   return inc
 }
 
-export async function assignIncident(id: string, payload: { assigneeId: string }, assigneeName?: string) {
-  const inc = await incidentsService.assignIncident(id, payload, assigneeName)
+export async function assignIncident(
+  id: string,
+  payload: { assigneeId: string },
+  assigneeName?: string,
+  actor?: { name: string; role: string }
+) {
+  const inc = await incidentsService.assignIncident(id, payload, assigneeName, actor)
   if (!inc) {
     const err = new Error('Incident not found') as Error & { status?: number }
     err.status = 404
@@ -56,8 +66,12 @@ export async function addIncidentNote(id: string, note: { text: string }) {
   return { note: noteResult }
 }
 
-export async function addTimelineUpdate(id: string, update: { text: string }) {
-  const result = await incidentsService.addTimelineUpdate(id, update)
+export async function addTimelineUpdate(
+  id: string,
+  update: { text: string },
+  actor?: { name: string; role: string }
+) {
+  const result = await incidentsService.addTimelineUpdate(id, update, actor)
   if (!result) {
     const err = new Error('Incident not found') as Error & { status?: number }
     err.status = 404
