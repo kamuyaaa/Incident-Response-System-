@@ -1,0 +1,122 @@
+{
+    "characterSpecVersion": "1.0",
+    "style": {
+      "type": "minimal-human",
+      "geometry": "stylized-rounded",
+      "material": "soft-matte",
+      "detailLevel": "low-to-medium",
+      "outline": false
+    },
+    "baseProportions": {
+      "headScale": [0.75, 0.78, 0.75],
+      "torsoScale": [0.85, 1.0, 0.45],
+      "armScale": [0.22, 0.78, 0.22],
+      "legScale": [0.24, 0.95, 0.24],
+      "handScale": [0.18, 0.18, 0.18],
+      "footScale": [0.26, 0.14, 0.42]
+    },
+    "parts": {
+      "head": {
+        "type": "sphereRounded",
+        "color": "#F2D1B3"
+      },
+      "hair": {
+        "type": "capShape",
+        "color": "#6B4F3A"
+      },
+      "torso": {
+        "type": "roundedBox",
+        "color": "#D9E6F2"
+      },
+      "arms": {
+        "type": "capsule",
+        "color": "#F2D1B3"
+      },
+      "legs": {
+        "type": "capsule",
+        "color": "#2F3B4C"
+      },
+      "shoes": {
+        "type": "roundedBox",
+        "color": "#F8F8F8"
+      }
+    },
+    "face": {
+      "eyes": {
+        "enabled": true,
+        "type": "dot",
+        "color": "#1F2937",
+        "spacing": 0.12
+      },
+      "mouth": {
+        "enabled": false
+      },
+      "nose": {
+        "enabled": false
+      }
+    },
+    "poses": {
+      "standingNeutral": {
+        "headRotation": [0, 0, 0],
+        "armLeftRotation": [0.08, 0, 0.08],
+        "armRightRotation": [-0.08, 0, -0.08],
+        "legLeftRotation": [0, 0, 0],
+        "legRightRotation": [0, 0, 0]
+      },
+      "dispatcherDesk": {
+        "headRotation": [0.03, -0.08, 0],
+        "armLeftRotation": [0.5, 0.1, 0.18],
+        "armRightRotation": [0.48, -0.08, -0.15],
+        "legLeftRotation": [0, 0, 0],
+        "legRightRotation": [0, 0, 0]
+      },
+      "walking": {
+        "armLeftRotation": [0.35, 0, 0],
+        "armRightRotation": [-0.35, 0, 0],
+        "legLeftRotation": [-0.25, 0, 0],
+        "legRightRotation": [0.25, 0, 0]
+      }
+    },
+    "roleVariants": {
+      "dispatcher": {
+        "torsoColor": "#DCE7F5",
+        "legsColor": "#374151",
+        "hairColor": "#5B4636",
+        "accessories": ["headset", "tablet"]
+      },
+      "paramedic": {
+        "torsoColor": "#D9F2E4",
+        "legsColor": "#334155",
+        "accessories": ["medicalBag"]
+      },
+      "firefighter": {
+        "torsoColor": "#F8D2C8",
+        "legsColor": "#2B2B2B",
+        "accessories": ["helmet"]
+      },
+      "police": {
+        "torsoColor": "#DBE7FF",
+        "legsColor": "#1E293B",
+        "accessories": ["cap", "radio"]
+      },
+      "civilian": {
+        "torsoColor": "#F5DDE8",
+        "legsColor": "#4B5563",
+        "accessories": ["phone"]
+      }
+    },
+    "animations": {
+      "idleFloat": {
+        "y": 0.02,
+        "duration": 2.4,
+        "repeat": -1,
+        "yoyo": true
+      },
+      "headTurnSubtle": {
+        "rotationY": 0.08,
+        "duration": 3.2,
+        "repeat": -1,
+        "yoyo": true
+      }
+    }
+  }
