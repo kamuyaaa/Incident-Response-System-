@@ -34,7 +34,20 @@ const incidentSchema = new mongoose.Schema(
     status: {
       type: String,
       required: true,
-      enum: ['reported', 'validated', 'assigned', 'in_progress', 'resolved', 'cancelled'],
+      enum: [
+        'reported',
+        'validated',
+        'escalated',
+        'assigned',
+        'en_route',
+        'near_scene',
+        'on_site',
+        'resolving',
+        // Back-compat (older flow)
+        'in_progress',
+        'resolved',
+        'cancelled',
+      ],
       default: 'reported',
     },
     location: {
@@ -58,6 +71,8 @@ const incidentSchema = new mongoose.Schema(
     statusHistory: [statusHistoryEntrySchema],
     reportedAt: { type: Date, default: Date.now },
     validatedAt: { type: Date },
+    escalatedAt: { type: Date },
+    escalatedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     resolvedAt: { type: Date },
   },
   { timestamps: true }

@@ -58,34 +58,36 @@ export function ReporterDashboard() {
         animate="show"
       >
         <motion.section variants={item} className="mb-6 sm:mb-8">
-          <p className="text-caption font-medium text-ers-inkTertiary mb-0.5">Welcome back</p>
-          <h1 className="text-h1 text-ers-ink tracking-tight">{user?.name}</h1>
+          <p className="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">Welcome back</p>
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">{user?.name}</h1>
         </motion.section>
 
-        <motion.section variants={item} className="mb-6 sm:mb-8">
-          <Link to="/report" className="block">
-            <motion.div
-              className="rounded-xl surface-card overflow-hidden border border-ers-subtle hover:border-emergency-500/40 transition-colors"
-              whileHover={{ scale: 1.005 }}
-              whileTap={{ scale: 0.995 }}
-            >
-              <div className="p-5 sm:p-6 flex flex-col sm:flex-row items-center gap-4 sm:gap-5">
-                <div className="rounded-xl bg-emergency-50 p-3.5 shrink-0">
-                  <AlertCircle className="w-10 h-10 text-emergency-600" aria-hidden />
+        {hasAnyRole('REPORTER') && (
+          <motion.section variants={item} className="mb-6 sm:mb-8">
+            <Link to="/report" className="block">
+              <motion.div
+                className="rounded-xl bg-gradient-to-r from-red-600 to-red-500 overflow-hidden shadow-lg shadow-red-500/20 hover:shadow-xl hover:shadow-red-500/30 transition-all"
+                whileHover={{ scale: 1.005 }}
+                whileTap={{ scale: 0.995 }}
+              >
+                <div className="p-5 sm:p-6 flex flex-col sm:flex-row items-center gap-4 sm:gap-5">
+                  <div className="rounded-xl bg-white/20 p-3.5 shrink-0 backdrop-blur-sm">
+                    <AlertCircle className="w-10 h-10 text-white" aria-hidden />
+                  </div>
+                  <div className="flex-1 text-center sm:text-left">
+                    <h2 className="text-lg font-bold text-white mb-0.5">Report emergency</h2>
+                    <p className="text-sm text-red-100">
+                      Send location and details. Help is dispatched quickly.
+                    </p>
+                  </div>
+                  <Button className="w-full sm:w-auto min-h-[44px] px-5 shrink-0 !bg-white !text-red-600 hover:!bg-red-50 font-semibold">
+                    Report now
+                  </Button>
                 </div>
-                <div className="flex-1 text-center sm:text-left">
-                  <h2 className="text-h3 text-ers-ink mb-0.5">Report emergency</h2>
-                  <p className="text-body-sm text-ers-inkSecondary">
-                    Send location and details. Help is dispatched quickly.
-                  </p>
-                </div>
-                <Button className="w-full sm:w-auto min-h-[44px] px-5 shrink-0">
-                  Report now
-                </Button>
-              </div>
-            </motion.div>
-          </Link>
-        </motion.section>
+              </motion.div>
+            </Link>
+          </motion.section>
+        )}
 
         <motion.section variants={item}>
           <h2 className="flex items-center gap-2 text-h4 text-ers-ink mb-3">
@@ -99,7 +101,7 @@ export function ReporterDashboard() {
                 title="No reports yet"
                 description="When you report an emergency, it will appear here. You can track status and responder ETA."
                 action={
-                  hasAnyRole('REPORTER', 'ADMIN') && (
+                  hasAnyRole('REPORTER') && (
                     <Link to="/report">
                       <Button>Report emergency</Button>
                     </Link>

@@ -44,7 +44,7 @@ router.patch(
   requireRole('RESPONDER'),
   [
     param('id').isMongoId(),
-    body('status').isIn(['pending', 'accepted', 'en_route', 'on_site', 'completed', 'declined']),
+    body('status').isIn(['pending', 'accepted', 'en_route', 'near_scene', 'on_site', 'resolving', 'completed', 'declined']),
   ],
   handleValidation,
   assignmentController.updateStatus

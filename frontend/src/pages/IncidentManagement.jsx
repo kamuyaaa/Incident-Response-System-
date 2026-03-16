@@ -22,14 +22,19 @@ export function IncidentManagement() {
   const [priorityFilter, setPriorityFilter] = useState('');
 
   useEffect(() => {
-    const params = new URLSearchParams();
-    if (statusFilter) params.set('status', statusFilter);
-    if (priorityFilter) params.set('priority', priorityFilter);
-    api
-      .get(`${INCIDENTS.list}?${params}`)
-      .then((res) => setItems(res.data || []))
-      .catch((err) => setError(err.message))
-      .finally(() => setLoading(false));
+    const load = () => {
+      const params = new URLSearchParams();
+      if (statusFilter) params.set('status', statusFilter);
+      if (priorityFilter) params.set('priority', priorityFilter);
+      api
+        .get(`${INCIDENTS.list}?${params}`)
+        .then((res) => setItems(res.data || []))
+        .catch((err) => setError(err.message))
+        .finally(() => setLoading(false));
+    };
+    load();
+    const t = setInterval(load, 15000);
+    return () => clearInterval(t);
   }, [statusFilter, priorityFilter]);
 
   if (loading) return <PageLayout title="Incident Management"><LoadingScreen /></PageLayout>;
@@ -42,12 +47,17 @@ export function IncidentManagement() {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="input-field w-auto min-w-[140px]"
+            className="ers-input w-auto min-w-[160px]"
           >
             <option value="">All statuses</option>
             <option value="reported">Reported</option>
             <option value="validated">Validated</option>
+            <option value="escalated">Escalated</option>
             <option value="assigned">Assigned</option>
+            <option value="en_route">En route</option>
+            <option value="near_scene">Near scene</option>
+            <option value="on_site">On site</option>
+            <option value="resolving">Resolving</option>
             <option value="in_progress">In progress</option>
             <option value="resolved">Resolved</option>
             <option value="cancelled">Cancelled</option>
@@ -55,7 +65,7 @@ export function IncidentManagement() {
           <select
             value={priorityFilter}
             onChange={(e) => setPriorityFilter(e.target.value)}
-            className="input-field w-auto min-w-[120px]"
+            className="ers-input w-auto min-w-[120px]"
           >
             <option value="">All priorities</option>
             <option value="low">Low</option>

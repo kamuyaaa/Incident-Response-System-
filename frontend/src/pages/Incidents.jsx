@@ -30,6 +30,8 @@ export function Incidents() {
       }
     };
     load();
+    const t = setInterval(load, 15000);
+    return () => clearInterval(t);
   }, [statusFilter]);
 
   return (

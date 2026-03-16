@@ -92,11 +92,13 @@ async function update(incidentId, updates, actorId, actorRole) {
   if (updates.status !== undefined) {
     incident.status = updates.status;
     if (!incident.statusHistory) incident.statusHistory = [];
-    incident.statusHistory.push({ status: updates.status, at: new Date(), by: actorId });
+    incident.statusHistory.push({ status: updates.status, at: new Date(), by: actorId, note: updates.note });
   }
   if (updates.priority !== undefined) incident.priority = updates.priority;
   if (updates.severity !== undefined) incident.severity = updates.severity;
   if (updates.validatedAt !== undefined) incident.validatedAt = updates.validatedAt;
+  if (updates.escalatedAt !== undefined) incident.escalatedAt = updates.escalatedAt;
+  if (updates.escalatedBy !== undefined) incident.escalatedBy = updates.escalatedBy;
   if (updates.resolvedAt !== undefined) incident.resolvedAt = updates.resolvedAt;
   if (updates.responseDeadline !== undefined) incident.responseDeadline = updates.responseDeadline ? new Date(updates.responseDeadline) : updates.responseDeadline;
   if (updates.responseThresholdMinutes !== undefined) incident.responseThresholdMinutes = updates.responseThresholdMinutes;

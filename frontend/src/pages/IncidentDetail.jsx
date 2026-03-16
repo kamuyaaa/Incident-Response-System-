@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../api/client';
-import { INCIDENTS, ASSIGNMENTS } from '../api/endpoints';
+import { INCIDENTS, ASSIGNMENTS, TRACKING } from '../api/endpoints';
 import { PageLayout } from '../components/layout/PageLayout';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
@@ -14,12 +14,9 @@ import { TrackingCard } from '../components/tracking/TrackingCard';
 import { TrackingSummaryCard } from '../components/tracking/TrackingSummaryCard';
 import { Skeleton } from '../components/ui/Skeleton';
 import {
-  getOrCreateSimulation,
-  advanceSimulation,
-  getSimulation,
   getTrackingDisplay,
 } from '../services/trackingSimulation';
-import { ArrowLeft, UserPlus, CheckCircle, XCircle, MapPin, Navigation, Flag, History } from 'lucide-react';
+import { ArrowLeft, UserPlus, CheckCircle, XCircle, MapPin, Navigation, Flag, History, ArrowUpRight, Shield } from 'lucide-react';
 
 function IncidentDetailSkeleton() {
   return (
@@ -71,18 +68,28 @@ function AssignmentActionButtons({ assignment, incident, updating, onStatus, onI
         </>
       )}
       {status === 'accepted' && (
-        <Button className={btnClass} onClick={() => onStatus(assignment._id, 'en_route', 'in_progress')} disabled={updating}>
+        <Button className={btnClass} onClick={() => onStatus(assignment._id, 'en_route', 'en_route')} disabled={updating}>
           <Navigation className="w-4 h-4 mr-1.5" /> En route
         </Button>
       )}
       {status === 'en_route' && (
-        <Button className={btnClass} onClick={() => onStatus(assignment._id, 'on_site')} disabled={updating}>
+        <Button className={btnClass} onClick={() => onStatus(assignment._id, 'near_scene', 'near_scene')} disabled={updating}>
+          <MapPin className="w-4 h-4 mr-1.5" /> Near scene
+        </Button>
+      )}
+      {status === 'near_scene' && (
+        <Button className={btnClass} onClick={() => onStatus(assignment._id, 'on_site', 'on_site')} disabled={updating}>
           <MapPin className="w-4 h-4 mr-1.5" /> On site
         </Button>
       )}
       {status === 'on_site' && (
+        <Button className={btnClass} onClick={() => onStatus(assignment._id, 'resolving', 'resolving')} disabled={updating}>
+          <Flag className="w-4 h-4 mr-1.5" /> Resolving
+        </Button>
+      )}
+      {status === 'resolving' && (
         <Button className={btnClass} onClick={() => onStatus(assignment._id, 'completed', 'resolved')} disabled={updating}>
-          <Flag className="w-4 h-4 mr-1.5" /> Resolved
+          <CheckCircle className="w-4 h-4 mr-1.5" /> Resolved
         </Button>
       )}
     </div>
@@ -101,7 +108,8 @@ export function IncidentDetail() {
   const [updating, setUpdating] = useState(false);
   const [assigning, setAssigning] = useState(false);
   const [simulation, setSimulation] = useState(null);
-  const simulationAdvancedRef = useRef(null);
+  const trackingPollRef = useRef(null);
+  const detailsPollRef = useRef(null);
 
   useEffect(() => {
     if (!id) {
@@ -128,47 +136,57 @@ export function IncidentDetail() {
       }
     };
     load();
+    detailsPollRef.current = setInterval(load, 8000);
+    return () => {
+      if (detailsPollRef.current) clearInterval(detailsPollRef.current);
+      detailsPollRef.current = null;
+    };
   }, [id]);
 
-  // Demo tracking: create/advance simulation when incident has location and assignment (once per load).
+  // Shared tracking: poll backend so all roles see synchronized movement.
   useEffect(() => {
-    if (!incident || !assignments.length || simulationAdvancedRef.current === id) return;
-    const coords = incident.location?.coordinates;
-    if (!coords || coords.length < 2) return;
-    const firstAssignment = assignments.find(
-      (a) => a.status !== 'declined' && (a.status === 'accepted' || a.status === 'en_route' || a.status === 'on_site' || a.status === 'completed')
-    ) || assignments[0];
-    if (!firstAssignment) return;
+    if (!id || !incident) return undefined;
 
-    const sim = getOrCreateSimulation(id, incident, firstAssignment);
-    if (!sim) return;
+    const hasAssignment = assignments.some((a) => a.status !== 'declined');
+    if (!hasAssignment) {
+      setSimulation(null);
+      return undefined;
+    }
 
-    const onStageChange = async (incidentId, newStage) => {
-      const current = getSimulation(incidentId);
-      if (!current?.assignmentId) return;
+    let cancelled = false;
+
+    const poll = async () => {
       try {
-        if (newStage === 'en_route') {
-          await api.patch(ASSIGNMENTS.status(current.assignmentId), { status: 'en_route' });
-        } else if (newStage === 'on_site') {
-          await api.patch(ASSIGNMENTS.status(current.assignmentId), { status: 'on_site' });
-        } else if (newStage === 'resolved') {
-          await api.patch(ASSIGNMENTS.status(current.assignmentId), { status: 'completed' });
-          await api.patch(INCIDENTS.update(incidentId), { status: 'resolved' });
+        const res = await api.get(TRACKING.byIncident(id));
+        if (cancelled) return;
+        const t = res.data;
+        if (t && t.active) {
+          setSimulation({
+            incidentId: id,
+            responderLat: t.responderLat,
+            responderLng: t.responderLng,
+            incidentLat: incident.location?.coordinates?.[1],
+            incidentLng: incident.location?.coordinates?.[0],
+            stage: t.stage,
+            responderType: t.responder?.serviceType || 'general',
+            responderName: t.responder?.name || 'Responder',
+            timeline: [],
+          });
+        } else {
+          setSimulation(null);
         }
-        const [incRes, assignRes] = await Promise.all([
-          api.get(INCIDENTS.one(incidentId)),
-          api.get(ASSIGNMENTS.byIncident(incidentId)),
-        ]);
-        setIncident(incRes.data);
-        setAssignments(assignRes.data || []);
-      } catch (e) {
-        console.error(e);
+      } catch {
+        // Keep UI usable if tracking fails
       }
     };
 
-    advanceSimulation(id, onStageChange);
-    simulationAdvancedRef.current = id;
-    setSimulation(getSimulation(id));
+    poll();
+    trackingPollRef.current = setInterval(poll, 5000);
+    return () => {
+      cancelled = true;
+      if (trackingPollRef.current) clearInterval(trackingPollRef.current);
+      trackingPollRef.current = null;
+    };
   }, [id, incident, assignments]);
 
   const loadRecommendations = async () => {
@@ -184,6 +202,18 @@ export function IncidentDetail() {
     setUpdating(true);
     try {
       const updated = await api.patch(INCIDENTS.validate(id), {});
+      setIncident(updated.data);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  const handleEscalate = async () => {
+    setUpdating(true);
+    try {
+      const updated = await api.patch(INCIDENTS.escalate(id), { note: 'Escalated for supervisor review (demo).' });
       setIncident(updated.data);
     } catch (e) {
       console.error(e);
@@ -208,10 +238,13 @@ export function IncidentDetail() {
     setAssigning(true);
     try {
       await api.post(ASSIGNMENTS.create, { incidentId: id, responderId });
-      const assignRes = await api.get(ASSIGNMENTS.byIncident(id));
+      const [incRes, assignRes] = await Promise.all([
+        api.get(INCIDENTS.one(id)),
+        api.get(ASSIGNMENTS.byIncident(id)),
+      ]);
+      setIncident(incRes.data ?? incRes);
       setAssignments(assignRes.data || []);
       setRecommendations([]);
-      setIncident((prev) => (prev ? { ...prev, status: 'assigned' } : null));
     } catch (e) {
       console.error(e);
     } finally {
@@ -231,13 +264,10 @@ export function IncidentDetail() {
     }
   };
 
-  const handleAssignmentStatus = async (assignmentId, status, incidentStatus) => {
+  const handleAssignmentStatus = async (assignmentId, status) => {
     setUpdating(true);
     try {
       await api.patch(ASSIGNMENTS.status(assignmentId), { status });
-      if (incidentStatus) {
-        await api.patch(INCIDENTS.update(id), { status: incidentStatus });
-      }
       const [inc, assignRes] = await Promise.all([
         api.get(INCIDENTS.one(id)),
         api.get(ASSIGNMENTS.byIncident(id)),
@@ -530,10 +560,17 @@ export function IncidentDetail() {
             </div>
           </div>
           {canAdmin && incident.status === 'reported' && (
-            <div className="rounded-xl border border-ers-subtle bg-ers-elevated p-5 sm:p-6">
-              <h3 className="text-h4 text-ers-ink mb-3">Actions</h3>
+            <div className="rounded-xl border border-slate-200 bg-white p-5 sm:p-6">
+              <h3 className="text-h4 text-ers-ink mb-1">Triage this incident</h3>
+              <p className="text-body-sm text-slate-500 mb-4">Review the report and take the appropriate action.</p>
               <div className="flex flex-wrap items-center gap-3">
-                <Button onClick={handleValidate} disabled={updating}>Validate</Button>
+                <Button onClick={handleValidate} disabled={updating}>
+                  <CheckCircle className="w-4 h-4 mr-1.5" /> Validate
+                </Button>
+                <Button variant="secondary" onClick={handleEscalate} disabled={updating}>
+                  <ArrowUpRight className="w-4 h-4 mr-1.5" />
+                  Escalate to supervisor
+                </Button>
                 <label className="text-label flex items-center gap-2">
                   <span>Priority</span>
                   <select
@@ -550,18 +587,84 @@ export function IncidentDetail() {
               </div>
             </div>
           )}
+          {canAdmin && incident.status === 'escalated' && (
+            <div className="rounded-xl border-2 border-amber-300 bg-amber-50 p-5 sm:p-6">
+              <div className="flex items-start gap-3 mb-4">
+                <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center shrink-0">
+                  <ArrowUpRight className="w-5 h-5 text-amber-600" />
+                </div>
+                <div>
+                  <h3 className="text-h4 text-amber-900 mb-0.5">Escalated — Supervisor action required</h3>
+                  <p className="text-body-sm text-amber-700">This incident was escalated for supervisor review. Choose how to proceed.</p>
+                </div>
+              </div>
+              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                <button
+                  onClick={handleValidate}
+                  disabled={updating}
+                  className="flex flex-col items-start p-4 rounded-xl border border-emerald-200 bg-white hover:bg-emerald-50 hover:border-emerald-300 transition-all text-left disabled:opacity-50"
+                >
+                  <CheckCircle className="w-5 h-5 text-emerald-600 mb-2" />
+                  <span className="text-sm font-semibold text-slate-900">Validate & approve</span>
+                  <span className="text-xs text-slate-500 mt-0.5">Confirm the report and proceed to assign a responder.</span>
+                </button>
+                <button
+                  onClick={() => loadRecommendations()}
+                  disabled={updating}
+                  className="flex flex-col items-start p-4 rounded-xl border border-sky-200 bg-white hover:bg-sky-50 hover:border-sky-300 transition-all text-left disabled:opacity-50"
+                >
+                  <UserPlus className="w-5 h-5 text-sky-600 mb-2" />
+                  <span className="text-sm font-semibold text-slate-900">Assign responder</span>
+                  <span className="text-xs text-slate-500 mt-0.5">Find and dispatch the nearest available unit.</span>
+                </button>
+                <button
+                  onClick={() => {}}
+                  className="flex flex-col items-start p-4 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 hover:border-slate-300 transition-all text-left"
+                >
+                  <label className="flex flex-col w-full cursor-pointer">
+                    <span className="text-sm font-semibold text-slate-900 mb-1.5 flex items-center gap-1.5">
+                      <Flag className="w-4 h-4 text-orange-500" /> Reprioritize
+                    </span>
+                    <select
+                      value={incident.priority}
+                      onChange={(e) => handlePriority(e.target.value)}
+                      className="ers-input py-2 text-sm"
+                    >
+                      <option value="low">Low</option>
+                      <option value="medium">Medium</option>
+                      <option value="high">High</option>
+                      <option value="critical">Critical</option>
+                    </select>
+                  </label>
+                </button>
+              </div>
+              {recommendations.length > 0 && (
+                <div className="mt-4 p-4 rounded-xl bg-white border border-slate-200">
+                  <h4 className="text-sm font-semibold text-slate-900 mb-2">Recommended responders</h4>
+                  <ul className="space-y-2">
+                    {recommendations.map((r) => (
+                      <li key={r._id} className="flex justify-between items-center py-2 border-b border-slate-100 last:border-0">
+                        <span className="text-slate-700 text-body-sm">{r.name} — {(r.distanceKm || 0).toFixed(1)} km</span>
+                        <Button disabled={assigning} onClick={() => handleAssign(r._id)} className="!py-1.5 !px-3 text-sm">Assign</Button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          )}
           {canAdmin && (incident.status === 'validated' || incident.status === 'assigned') && (
-            <div className="rounded-xl border border-ers-subtle bg-ers-elevated p-5 sm:p-6">
+            <div className="rounded-xl border border-slate-200 bg-white p-5 sm:p-6">
               <h3 className="text-h4 text-ers-ink mb-3">Assign responder</h3>
               {recommendations.length === 0 ? (
                 <Button variant="secondary" onClick={loadRecommendations}>
-                  <UserPlus className="w-4 h-4" /> Recommend nearest
+                  <UserPlus className="w-4 h-4 mr-1.5" /> Find nearest responders
                 </Button>
               ) : (
                 <ul className="space-y-2">
                   {recommendations.map((r) => (
-                    <li key={r._id} className="flex justify-between items-center">
-                      <span className="text-ers-ink text-body-sm">{r.name} · {(r.distanceKm || 0).toFixed(1)} km</span>
+                    <li key={r._id} className="flex justify-between items-center py-2 border-b border-slate-100 last:border-0">
+                      <span className="text-slate-700 text-body-sm">{r.name} — {(r.distanceKm || 0).toFixed(1)} km</span>
                       <Button disabled={assigning} onClick={() => handleAssign(r._id)}>Assign</Button>
                     </li>
                   ))}

@@ -4,30 +4,37 @@ import { clsx } from 'clsx';
 const statusStyles = {
   reported: 'bg-amber-100 text-amber-800 border-amber-200',
   validated: 'bg-blue-100 text-blue-800 border-blue-200',
+  escalated: 'bg-emergency-100 text-emergency-700 border-emergency-200',
   assigned: 'bg-violet-100 text-violet-800 border-violet-200',
-  in_progress: 'bg-cyan-100 text-cyan-800 border-cyan-200',
+  en_route: 'bg-teal-100 text-teal-800 border-teal-200',
+  near_scene: 'bg-teal-100 text-teal-800 border-teal-200',
+  on_site: 'bg-emerald-100 text-emerald-800 border-emerald-200',
+  resolving: 'bg-amber-100 text-amber-800 border-amber-200',
+  in_progress: 'bg-teal-100 text-teal-800 border-teal-200',
   resolved: 'bg-emerald-100 text-emerald-800 border-emerald-200',
-  cancelled: 'bg-ers-subtle text-ers-inkTertiary border-ers-subtle',
+  cancelled: 'bg-slate-100 text-slate-500 border-slate-200',
   pending: 'bg-amber-100 text-amber-800 border-amber-200',
   accepted: 'bg-blue-100 text-blue-800 border-blue-200',
-  en_route: 'bg-cyan-100 text-cyan-800 border-cyan-200',
-  on_site: 'bg-teal-100 text-teal-800 border-teal-200',
+  en_route: 'bg-teal-100 text-teal-800 border-teal-200',
+  near_scene: 'bg-teal-100 text-teal-800 border-teal-200',
+  on_site: 'bg-emerald-100 text-emerald-800 border-emerald-200',
+  resolving: 'bg-amber-100 text-amber-800 border-amber-200',
   completed: 'bg-emerald-100 text-emerald-800 border-emerald-200',
-  declined: 'bg-ers-subtle text-ers-inkTertiary border-ers-subtle',
+  declined: 'bg-slate-100 text-slate-500 border-slate-200',
 };
 
-const liveStatuses = ['in_progress', 'en_route', 'on_site', 'accepted'];
+const liveStatuses = ['in_progress', 'en_route', 'near_scene', 'on_site', 'resolving', 'accepted'];
 
 const priorityStyles = {
-  low: 'text-ers-inkTertiary',
-  medium: 'text-amber-700',
-  high: 'text-orange-700',
-  critical: 'text-emergency-600 font-semibold',
+  low: 'text-slate-500',
+  medium: 'text-amber-600',
+  high: 'text-orange-600 font-semibold',
+  critical: 'text-red-600 font-bold',
 };
 
 export function StatusBadge({ status, animated }) {
   const isLive = animated && status && liveStatuses.includes(status);
-  const style = statusStyles[status] || 'bg-ers-subtle text-ers-inkSecondary border-ers-subtle';
+  const style = statusStyles[status] || 'bg-slate-100 text-slate-600 border-slate-200';
 
   const content = (
     <>
@@ -65,7 +72,7 @@ export function StatusBadge({ status, animated }) {
 
 export function PriorityBadge({ priority }) {
   return (
-    <span className={clsx('text-caption font-medium', priorityStyles[priority] || 'text-ers-inkTertiary')}>
+    <span className={clsx('text-caption font-medium capitalize', priorityStyles[priority] || 'text-slate-500')}>
       {priority ?? '—'}
     </span>
   );

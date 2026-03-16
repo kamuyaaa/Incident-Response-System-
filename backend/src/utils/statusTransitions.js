@@ -1,7 +1,13 @@
 const INCIDENT_TRANSITIONS = {
-  reported: ['validated', 'cancelled'],
-  validated: ['assigned', 'cancelled'],
-  assigned: ['in_progress', 'cancelled'],
+  reported: ['validated', 'escalated', 'cancelled'],
+  validated: ['escalated', 'assigned', 'cancelled'],
+  escalated: ['assigned', 'cancelled'],
+  assigned: ['en_route', 'in_progress', 'cancelled'],
+  en_route: ['near_scene', 'on_site', 'resolving', 'cancelled'],
+  near_scene: ['on_site', 'resolving', 'cancelled'],
+  on_site: ['resolving', 'resolved', 'cancelled'],
+  resolving: ['resolved', 'cancelled'],
+  // Back-compat
   in_progress: ['resolved', 'cancelled'],
   resolved: [],
   cancelled: [],
@@ -10,8 +16,10 @@ const INCIDENT_TRANSITIONS = {
 const ASSIGNMENT_TRANSITIONS = {
   pending: ['accepted', 'declined'],
   accepted: ['en_route', 'declined'],
-  en_route: ['on_site'],
-  on_site: ['completed'],
+  en_route: ['near_scene', 'on_site'],
+  near_scene: ['on_site'],
+  on_site: ['resolving'],
+  resolving: ['completed'],
   completed: [],
   declined: [],
 };

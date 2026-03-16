@@ -3,6 +3,7 @@ const Incident = require('../models/Incident');
 const auditService = require('./auditService');
 const alertService = require('./alertService');
 const { validateAssignmentStatusTransition } = require('../utils/statusTransitions');
+const incidentService = require('./incidentService');
 
 async function assign(incidentId, responderId, assignedBy) {
   const incident = await Incident.findById(incidentId);
@@ -16,13 +17,27 @@ async function assign(incidentId, responderId, assignedBy) {
     assignedBy,
     status: 'pending',
   });
-  await Incident.findByIdAndUpdate(incidentId, { status: 'assigned' });
+  await incidentService.update(
+    incidentId,
+    { status: 'assigned' },
+    assignedBy,
+    'ADMIN'
+  );
   await auditService.append(assignedBy, null, 'assignment_create', 'Assignment', assignment._id.toString(), {
     incidentId,
     responderId,
   });
   await alertService.checkResponseTime(incident);
   return assignment;
+}
+
+function mapAssignmentToIncidentStatus(status) {
+  if (status === 'en_route') return 'en_route';
+  if (status === 'near_scene') return 'near_scene';
+  if (status === 'on_site') return 'on_site';
+  if (status === 'resolving') return 'resolving';
+  if (status === 'completed') return 'resolved';
+  return null;
 }
 
 async function updateStatus(assignmentId, status, actorId, actorRole) {
@@ -33,12 +48,21 @@ async function updateStatus(assignmentId, status, actorId, actorRole) {
   if (status === 'accepted') assignment.acceptedAt = new Date();
   if (status === 'completed') assignment.completedAt = new Date();
   await assignment.save();
-  if (status === 'en_route' || status === 'on_site') {
-    await Incident.findByIdAndUpdate(assignment.incidentId._id || assignment.incidentId, { status: 'in_progress' });
-  }
   const incidentId = assignment.incidentId?._id || assignment.incidentId;
-  if (status === 'completed')
-    await Incident.findByIdAndUpdate(incidentId, { status: 'resolved', resolvedAt: new Date() });
+  // Keep incident status aligned with responder progress (and append statusHistory centrally).
+  const incidentStatus = mapAssignmentToIncidentStatus(status);
+  if (incidentStatus) {
+    await incidentService.update(
+      incidentId,
+      {
+        status: incidentStatus,
+        ...(incidentStatus === 'resolved' ? { resolvedAt: new Date() } : {}),
+        note: actorRole === 'RESPONDER' ? 'Responder updated status.' : 'Assignment status updated.',
+      },
+      actorId,
+      actorRole
+    );
+  }
 
   await auditService.append(actorId, actorRole, 'assignment_status_update', 'Assignment', assignmentId.toString(), {
     status,

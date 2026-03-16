@@ -43,7 +43,7 @@ async function getResponderSummary(responderId) {
   const [assignments, countsByStatus] = await Promise.all([
     Assignment.find({ responderId }).sort({ assignedAt: -1 }).limit(10).populate('incidentId').populate('assignedBy', 'name').lean(),
     Assignment.aggregate([
-      { $match: { responderId: mongoose.Types.ObjectId(responderId) } },
+      { $match: { responderId: new mongoose.Types.ObjectId(responderId) } },
       { $group: { _id: '$status', count: { $sum: 1 } } },
     ]),
   ]);
@@ -61,7 +61,7 @@ async function getResponderSummary(responderId) {
 async function getReporterSummary(reporterId) {
   const [byStatus, recent] = await Promise.all([
     Incident.aggregate([
-      { $match: { reporterId: mongoose.Types.ObjectId(reporterId) } },
+      { $match: { reporterId: new mongoose.Types.ObjectId(reporterId) } },
       { $group: { _id: '$status', count: { $sum: 1 } } },
     ]),
     Incident.find({ reporterId }).sort({ createdAt: -1 }).limit(10).populate('reporterId', 'name email').lean(),

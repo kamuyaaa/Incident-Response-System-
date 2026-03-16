@@ -8,12 +8,13 @@ const assignmentSchema = new mongoose.Schema(
     status: {
       type: String,
       required: true,
-      enum: ['pending', 'accepted', 'en_route', 'on_site', 'completed', 'declined'],
+      enum: ['pending', 'accepted', 'en_route', 'near_scene', 'on_site', 'resolving', 'completed', 'declined'],
       default: 'pending',
     },
     assignedAt: { type: Date, default: Date.now },
     acceptedAt: { type: Date },
     completedAt: { type: Date },
+    lastTrackedAt: { type: Date },
   },
   { timestamps: true }
 );

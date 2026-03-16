@@ -2,11 +2,11 @@ import { motion } from 'framer-motion';
 
 const variants = {
   primary:
-    'bg-emergency-600 hover:bg-emergency-700 text-white shadow-ers-card hover:shadow-ers-glow',
-  secondary: 'bg-ers-surface border border-ers-subtle text-ers-ink hover:bg-ers-subtle/80',
-  outline: 'bg-transparent border-2 border-ers-subtle text-ers-ink hover:border-ers-inkSecondary hover:bg-ers-subtle/50',
-  ghost: 'bg-transparent hover:bg-ers-subtle/80 text-ers-inkSecondary hover:text-ers-ink',
-  danger: 'bg-emergency-700 hover:bg-emergency-800 text-white',
+    'bg-slate-900 hover:bg-slate-800 text-white shadow-sm hover:shadow-md',
+  secondary: 'bg-slate-100 border border-slate-200 text-slate-700 hover:bg-slate-200/80 hover:text-slate-900',
+  outline: 'bg-transparent border-2 border-slate-200 text-slate-700 hover:border-slate-400 hover:bg-slate-50',
+  ghost: 'bg-transparent hover:bg-slate-100 text-slate-600 hover:text-slate-900',
+  danger: 'bg-red-600 hover:bg-red-700 text-white shadow-sm',
   amber: 'bg-amber-600 hover:bg-amber-700 text-white font-semibold',
   teal: 'bg-teal-600 hover:bg-teal-700 text-white',
 };

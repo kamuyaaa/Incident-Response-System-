@@ -28,10 +28,10 @@ function QuickAction({ assignment, incident, onStatus, updating }) {
   const status = assignment?.status;
   if (!status || status === 'completed' || status === 'declined') return null;
 
-  const handle = (e, newStatus, incidentStatus) => {
+  const handle = (e, newStatus) => {
     e.preventDefault();
     e.stopPropagation();
-    onStatus(assignment._id, newStatus, incidentStatus);
+    onStatus(assignment._id, newStatus);
   };
   const stop = (e) => {
     e.preventDefault();
@@ -64,7 +64,7 @@ function QuickAction({ assignment, incident, onStatus, updating }) {
     return (
       <Button
         className="!py-2.5 !px-4 text-sm w-full min-h-[44px] mt-3"
-        onClick={(e) => { handle(e, 'en_route', 'in_progress'); }}
+        onClick={(e) => { handle(e, 'en_route'); }}
         disabled={updating}
       >
         <Navigation className="w-4 h-4 mr-2" />
@@ -88,7 +88,7 @@ function QuickAction({ assignment, incident, onStatus, updating }) {
     return (
       <Button
         className="!py-2.5 !px-4 text-sm w-full min-h-[44px] mt-3"
-        onClick={(e) => { handle(e, 'completed', 'resolved'); }}
+        onClick={(e) => { handle(e, 'completed'); }}
         disabled={updating}
       >
         <Flag className="w-4 h-4 mr-2" />
@@ -127,13 +127,10 @@ export function ResponderDashboard() {
     return () => clearInterval(t);
   }, [statusFilter]);
 
-  const handleStatusChange = async (assignmentId, status, incidentStatus) => {
+  const handleStatusChange = async (assignmentId, status) => {
     setUpdating(true);
     try {
       await api.patch(ASSIGNMENTS.status(assignmentId), { status });
-      const a = assignments.find((x) => x._id === assignmentId);
-      const incId = a?.incidentId?._id || a?.incidentId;
-      if (incidentStatus && incId) await api.patch(INCIDENTS.update(incId), { status: incidentStatus });
       load();
     } catch (e) {
       console.error(e);
@@ -170,24 +167,30 @@ export function ResponderDashboard() {
         {/* Metrics */}
         <section className="grid grid-cols-3 gap-2 sm:gap-3">
           <motion.div variants={item}>
-            <div className="rounded-xl surface-panel p-3 sm:p-4 border border-amber-200 bg-amber-50/80">
-              <p className="text-xl sm:text-2xl font-bold text-amber-300 tabular-nums">{pending}</p>
-              <p className="text-ers-inkSecondary text-body-sm mt-0.5">Pending</p>
-              <Clock className="w-4 h-4 text-amber-400/80 mt-1.5" />
+            <div className="rounded-xl p-4 sm:p-5 border border-amber-200 bg-amber-50">
+              <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center mb-2">
+                <Clock className="w-4 h-4 text-amber-600" />
+              </div>
+              <p className="text-xl sm:text-2xl font-bold text-amber-700 tabular-nums">{pending}</p>
+              <p className="text-xs font-medium text-amber-600 mt-0.5">Pending</p>
             </div>
           </motion.div>
           <motion.div variants={item}>
-            <div className="rounded-xl surface-panel p-3 sm:p-4 border border-teal-200 bg-teal-50/80">
-              <p className="text-xl sm:text-2xl font-bold text-teal-600 tabular-nums">{active}</p>
-              <p className="text-ers-inkSecondary text-body-sm mt-0.5">Active</p>
-              <Navigation className="w-4 h-4 text-teal-600/80 mt-1.5" />
+            <div className="rounded-xl p-4 sm:p-5 border border-sky-200 bg-sky-50">
+              <div className="w-8 h-8 rounded-lg bg-sky-100 flex items-center justify-center mb-2">
+                <Navigation className="w-4 h-4 text-sky-600" />
+              </div>
+              <p className="text-xl sm:text-2xl font-bold text-sky-700 tabular-nums">{active}</p>
+              <p className="text-xs font-medium text-sky-600 mt-0.5">Active</p>
             </div>
           </motion.div>
           <motion.div variants={item}>
-            <div className="rounded-xl surface-panel p-3 sm:p-4 border border-emerald-200 bg-emerald-50/80">
-              <p className="text-xl sm:text-2xl font-bold text-emerald-300 tabular-nums">{completed}</p>
-              <p className="text-body-sm text-ers-inkTertiary mt-0.5">Completed</p>
-              <CheckCircle className="w-4 h-4 text-emerald-400/80 mt-1.5" />
+            <div className="rounded-xl p-4 sm:p-5 border border-emerald-200 bg-emerald-50">
+              <div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center mb-2">
+                <CheckCircle className="w-4 h-4 text-emerald-600" />
+              </div>
+              <p className="text-xl sm:text-2xl font-bold text-emerald-700 tabular-nums">{completed}</p>
+              <p className="text-xs font-medium text-emerald-600 mt-0.5">Completed</p>
             </div>
           </motion.div>
         </section>

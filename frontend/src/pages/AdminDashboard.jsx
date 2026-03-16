@@ -181,11 +181,11 @@ export function AdminDashboard() {
       {resetMessage && (
         <div
           className={`mb-4 p-3 rounded-xl text-sm flex items-center justify-between flex-wrap gap-2 ${
-            resetMessage.includes('Created') ? 'bg-emerald-500/10 text-emerald-300' : 'bg-amber-500/10 text-amber-300'
+            resetMessage.includes('Created') ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-amber-50 text-amber-700 border border-amber-200'
           }`}
         >
           <span>{resetMessage}</span>
-          <button type="button" onClick={() => setResetMessage(null)} className="underline">
+          <button type="button" onClick={() => setResetMessage(null)} className="text-xs font-medium underline">
             Dismiss
           </button>
         </div>
@@ -194,44 +194,60 @@ export function AdminDashboard() {
       <motion.div className="space-y-5" variants={stagger} initial="hidden" animate="show">
         <section>
           <h2 className="sr-only">Key metrics</h2>
-          <div className="grid grid-cols-2 lg:grid-cols-12 gap-3">
-            <motion.div variants={item} className="lg:col-span-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+            <motion.div variants={item}>
               <Link to="/manage" className="block">
-                <div className="rounded-xl border border-ers-subtle bg-ers-elevated p-4 sm:p-5 hover:border-ers-inkSecondary/30 transition-colors h-full">
-                  <p className="text-3xl sm:text-4xl font-bold text-ers-ink tabular-nums tracking-tight">{total}</p>
-                  <p className="text-sm text-ers-inkSecondary mt-1">Total incidents</p>
-                  <ClipboardList className="w-6 h-6 text-ers-inkTertiary/60 mt-4" />
+                <div className="rounded-xl border border-slate-200 bg-white p-4 sm:p-5 hover:shadow-md hover:border-slate-300 transition-all h-full group">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center group-hover:bg-slate-200 transition-colors">
+                      <ClipboardList className="w-4 h-4 text-slate-600" />
+                    </div>
+                  </div>
+                  <p className="text-2xl sm:text-3xl font-bold text-slate-900 tabular-nums tracking-tight">{total}</p>
+                  <p className="text-xs font-medium text-slate-500 mt-1">Total incidents</p>
                 </div>
               </Link>
             </motion.div>
-            <motion.div variants={item} className="lg:col-span-2">
+            <motion.div variants={item}>
               <Link to="/manage?status=reported" className="block">
-                <div className="rounded-xl border border-teal-200 bg-teal-50/80 p-4 hover:border-teal-300 transition-colors h-full">
-                  <p className="text-2xl font-bold text-teal-700 tabular-nums">{active}</p>
-                  <p className="text-xs text-ers-inkSecondary mt-0.5">Active</p>
+                <div className="rounded-xl border border-sky-200 bg-sky-50 p-4 hover:shadow-md hover:border-sky-300 transition-all h-full">
+                  <div className="w-9 h-9 rounded-lg bg-sky-100 flex items-center justify-center mb-3">
+                    <Zap className="w-4 h-4 text-sky-600" />
+                  </div>
+                  <p className="text-2xl font-bold text-sky-700 tabular-nums">{active}</p>
+                  <p className="text-xs font-medium text-sky-600 mt-0.5">Active</p>
                 </div>
               </Link>
             </motion.div>
-            <motion.div variants={item} className="lg:col-span-2">
+            <motion.div variants={item}>
               <Link to="/alerts" className="block">
-                <div className="rounded-xl border border-amber-200 bg-amber-50/80 p-4 hover:border-amber-300 transition-colors h-full">
+                <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 hover:shadow-md hover:border-amber-300 transition-all h-full">
+                  <div className="w-9 h-9 rounded-lg bg-amber-100 flex items-center justify-center mb-3">
+                    <AlertTriangle className="w-4 h-4 text-amber-600" />
+                  </div>
                   <p className="text-2xl font-bold text-amber-700 tabular-nums">{overdue}</p>
-                  <p className="text-xs text-ers-inkSecondary mt-0.5">Overdue</p>
+                  <p className="text-xs font-medium text-amber-600 mt-0.5">Overdue</p>
                 </div>
               </Link>
             </motion.div>
-            <motion.div variants={item} className="lg:col-span-2">
+            <motion.div variants={item}>
               <Link to="/manage?status=resolved" className="block">
-                <div className="rounded-xl border border-emerald-200 bg-emerald-50/80 p-4 hover:border-emerald-300 transition-colors h-full">
+                <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 hover:shadow-md hover:border-emerald-300 transition-all h-full">
+                  <div className="w-9 h-9 rounded-lg bg-emerald-100 flex items-center justify-center mb-3">
+                    <CheckCheck className="w-4 h-4 text-emerald-600" />
+                  </div>
                   <p className="text-2xl font-bold text-emerald-700 tabular-nums">{resolved}</p>
-                  <p className="text-xs text-ers-inkSecondary mt-0.5">Resolved</p>
+                  <p className="text-xs font-medium text-emerald-600 mt-0.5">Resolved</p>
                 </div>
               </Link>
             </motion.div>
-            <motion.div variants={item} className="lg:col-span-2">
-              <div className="rounded-xl border border-ers-subtle bg-ers-surface/60 p-4 h-full">
-                <p className="text-2xl font-bold text-ers-ink tabular-nums">{respondersAvailable}</p>
-                <p className="text-xs text-ers-inkSecondary mt-0.5">Responders</p>
+            <motion.div variants={item}>
+              <div className="rounded-xl border border-violet-200 bg-violet-50 p-4 h-full">
+                <div className="w-9 h-9 rounded-lg bg-violet-100 flex items-center justify-center mb-3">
+                  <Users className="w-4 h-4 text-violet-600" />
+                </div>
+                <p className="text-2xl font-bold text-violet-700 tabular-nums">{respondersAvailable}</p>
+                <p className="text-xs font-medium text-violet-600 mt-0.5">Responders</p>
               </div>
             </motion.div>
           </div>
@@ -239,10 +255,10 @@ export function AdminDashboard() {
 
         <div className="grid gap-5 xl:grid-cols-5">
           <div className="xl:col-span-3 space-y-5">
-            <section className="rounded-xl border border-ers-subtle bg-ers-elevated overflow-hidden">
-              <div className="p-4 border-b border-ers-subtle">
-                <h2 className="text-h4 text-ers-ink font-semibold flex items-center gap-2 mb-2">
-                  <ClipboardList className="w-5 h-5 text-ers-inkTertiary" />
+            <section className="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-sm">
+              <div className="p-4 border-b border-slate-100">
+                <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2 mb-3">
+                  <ClipboardList className="w-4 h-4 text-slate-400" />
                   Incidents
                 </h2>
                 <div className="flex flex-wrap gap-2 sm:gap-3">

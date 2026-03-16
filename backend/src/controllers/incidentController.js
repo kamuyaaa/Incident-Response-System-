@@ -78,6 +78,21 @@ async function prioritize(req, res, next) {
   }
 }
 
+async function escalate(req, res, next) {
+  try {
+    const note = req.body.note ? String(req.body.note).trim() : '';
+    const incident = await incidentService.update(
+      req.params.id,
+      { status: 'escalated', escalatedAt: new Date(), escalatedBy: req.user._id, note },
+      req.user._id,
+      req.user.role
+    );
+    res.json({ data: incident });
+  } catch (err) {
+    next(err);
+  }
+}
+
 async function guestReport(req, res, next) {
   try {
     const incident = await incidentService.createGuestReport(req.body);
@@ -99,4 +114,4 @@ async function guestReportUpload(req, res, next) {
   }
 }
 
-module.exports = { create, guestReport, guestReportUpload, list, getById, update, validate, prioritize };
+module.exports = { create, guestReport, guestReportUpload, list, getById, update, validate, prioritize, escalate };

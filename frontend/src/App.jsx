@@ -65,7 +65,7 @@ function AppRoutes() {
             <Route
               path="/report"
               element={
-                <ProtectedRoute allowedRoles={['REPORTER', 'ADMIN']}>
+                <ProtectedRoute allowedRoles={['REPORTER']}>
                   <ReportIncident />
                 </ProtectedRoute>
               }
@@ -73,7 +73,7 @@ function AppRoutes() {
             <Route
               path="/incidents/new"
               element={
-                <ProtectedRoute allowedRoles={['REPORTER', 'ADMIN']}>
+                <ProtectedRoute allowedRoles={['REPORTER']}>
                   <ReportIncident />
                 </ProtectedRoute>
               }
@@ -136,7 +136,7 @@ function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <div className="min-h-screen text-ers-ink bg-ers-bg">
+        <div className="min-h-screen text-slate-900 bg-slate-50">
           <Header />
           <AppRoutes />
         </div>

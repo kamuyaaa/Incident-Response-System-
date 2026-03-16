@@ -80,7 +80,21 @@ const createValidation = [
 ];
 
 const updateValidation = [
-  body('status').optional().isIn(['reported', 'validated', 'assigned', 'in_progress', 'resolved', 'cancelled']),
+  body('status')
+    .optional()
+    .isIn([
+      'reported',
+      'validated',
+      'escalated',
+      'assigned',
+      'en_route',
+      'near_scene',
+      'on_site',
+      'resolving',
+      'in_progress',
+      'resolved',
+      'cancelled',
+    ]),
   body('priority').optional().isIn(['low', 'medium', 'high', 'critical']),
   body('severity').optional().isIn(['low', 'medium', 'high', 'critical']),
   body('validatedAt').optional().isISO8601(),
@@ -149,6 +163,15 @@ router.patch(
   [param('id').isMongoId(), body('priority').isIn(['low', 'medium', 'high', 'critical'])],
   handleValidation,
   incidentController.prioritize
+);
+
+router.patch(
+  '/:id/escalate',
+  auth,
+  requireRole('ADMIN', 'SUPERVISOR'),
+  [param('id').isMongoId(), body('note').optional().isString().isLength({ max: 500 })],
+  handleValidation,
+  incidentController.escalate
 );
 
 module.exports = router;

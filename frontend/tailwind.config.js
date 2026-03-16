@@ -8,13 +8,14 @@ export default {
       extend: {
         colors: {
           ers: {
-            bg: '#faf8f5',
-            surface: '#f5f2ed',
+            bg: '#f8fafc',
+            surface: '#f1f5f9',
             elevated: '#ffffff',
-            subtle: '#efebe6',
-            ink: '#1c1917',
-            inkSecondary: '#57534e',
-            inkTertiary: '#78716c',
+            subtle: '#e2e8f0',
+            ink: '#0f172a',
+            inkSecondary: '#475569',
+            inkTertiary: '#94a3b8',
+            brand: '#0ea5e9',
           },
           emergency: {
             50: '#fef2f2', 100: '#fee2e2', 200: '#fecaca', 300: '#fca5a5',

@@ -9,6 +9,7 @@ const auditRoutes = require('./routes/audit');
 const userRoutes = require('./routes/users');
 const dashboardRoutes = require('./routes/dashboard');
 const demoRoutes = require('./routes/demo');
+const trackingRoutes = require('./routes/tracking');
 const errorHandler = require('./middleware/errorHandler');
 
 const app = express();
@@ -31,6 +32,7 @@ app.use('/api/audit', auditRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/demo', demoRoutes);
+app.use('/api/tracking', trackingRoutes);
 
 app.use(errorHandler);
 

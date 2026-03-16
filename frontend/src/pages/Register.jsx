@@ -40,15 +40,19 @@ export function Register() {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="min-h-screen bg-ers-bg flex flex-col justify-center px-5 sm:px-8 py-12"
+      className="min-h-screen bg-slate-50 flex flex-col justify-center px-5 sm:px-8 py-12"
     >
       <div className="w-full max-w-sm mx-auto">
-        <div className="mb-6">
-          <div className="w-11 h-11 rounded-xl bg-emergency-50 flex items-center justify-center mb-4">
-            <AlertCircle className="w-5 h-5 text-emergency-600" aria-hidden />
+        <div className="mb-8">
+          <div className="flex items-center gap-3 mb-6">
+            <img src="/images/ers-logo.png" alt="" className="w-10 h-10 rounded-lg object-contain" />
+            <div>
+              <span className="text-sm font-bold text-slate-900 tracking-tight">ERS Kenya</span>
+              <span className="block text-[10px] font-medium text-slate-400 uppercase tracking-wider">Emergency Response</span>
+            </div>
           </div>
-          <h1 className="text-display-lg text-ers-ink">Create account</h1>
-          <p className="text-caption text-ers-inkTertiary mt-0.5">Report emergencies and get help</p>
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Create account</h1>
+          <p className="text-sm text-slate-500 mt-1">Report emergencies and track response</p>
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">
           <Input label="Full name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Jane Doe" required autoComplete="name" />

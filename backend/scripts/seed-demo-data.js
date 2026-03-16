@@ -64,7 +64,7 @@ const INCIDENT_TEMPLATES = [
 ];
 
 const PRIORITIES = ['low', 'medium', 'high', 'critical'];
-const INCIDENT_STATUSES = ['reported', 'validated', 'assigned', 'in_progress', 'resolved', 'cancelled'];
+const INCIDENT_STATUSES = ['reported', 'validated', 'escalated', 'assigned', 'en_route', 'near_scene', 'on_site', 'resolving', 'resolved', 'cancelled'];
 
 async function ensureDemoUsers() {
   const created = [];
@@ -118,10 +118,25 @@ function buildStatusHistory(status, reportedAt, byId) {
   if (status === 'reported') return hist;
   hist.push({ status: 'validated', at: new Date(reportedAt.getTime() + 15 * 60000), by: byId });
   if (status === 'validated') return hist;
+  if (status === 'escalated') {
+    hist.push({ status: 'escalated', at: new Date(reportedAt.getTime() + 20 * 60000), by: byId, note: 'Escalated for supervisor review.' });
+    return hist;
+  }
   hist.push({ status: 'assigned', at: new Date(reportedAt.getTime() + 25 * 60000), by: byId });
   if (status === 'assigned') return hist;
-  hist.push({ status: 'in_progress', at: new Date(reportedAt.getTime() + 35 * 60000), by: byId });
-  if (status === 'in_progress') return hist;
+  hist.push({ status: 'en_route', at: new Date(reportedAt.getTime() + 32 * 60000), by: byId });
+  if (status === 'en_route') return hist;
+  hist.push({ status: 'near_scene', at: new Date(reportedAt.getTime() + 45 * 60000), by: byId });
+  if (status === 'near_scene') return hist;
+  hist.push({ status: 'on_site', at: new Date(reportedAt.getTime() + 55 * 60000), by: byId });
+  if (status === 'on_site') return hist;
+  hist.push({ status: 'resolving', at: new Date(reportedAt.getTime() + 65 * 60000), by: byId });
+  if (status === 'resolving') return hist;
+  // Back compat
+  if (status === 'in_progress') {
+    hist.push({ status: 'in_progress', at: new Date(reportedAt.getTime() + 35 * 60000), by: byId });
+    return hist;
+  }
   hist.push({ status: 'resolved', at: now, by: byId });
   return hist;
 }
@@ -133,7 +148,13 @@ function kenyaPhone() {
 async function seedIncidents(ids) {
   const incidents = [];
   const statusDistribution = [
-    'reported', 'reported', 'validated', 'validated', 'assigned', 'assigned', 'in_progress', 'in_progress', 'in_progress', 'resolved', 'resolved', 'resolved', 'resolved', 'cancelled',
+    'reported', 'reported',
+    'validated', 'validated',
+    'escalated',
+    'assigned', 'assigned',
+    'en_route', 'near_scene', 'on_site', 'resolving',
+    'resolved', 'resolved', 'resolved',
+    'cancelled',
   ];
   const landmarks = ['near bus stage', 'opposite market', 'along highway', 'near school', 'next to hospital', 'at roundabout', 'near police station', 'along river'];
   for (let i = 0; i < 55; i++) {
@@ -164,6 +185,8 @@ async function seedIncidents(ids) {
       statusHistory,
       reportedAt,
       validatedAt: status !== 'reported' ? new Date(reportedAt.getTime() + 15 * 60000) : undefined,
+      escalatedAt: status === 'escalated' ? new Date(reportedAt.getTime() + 20 * 60000) : undefined,
+      escalatedBy: status === 'escalated' ? ids.admin : undefined,
       resolvedAt: status === 'resolved' ? new Date(reportedAt.getTime() + 90 * 60000) : undefined,
       responseThresholdMinutes: priority === 'critical' ? 15 : priority === 'high' ? 25 : 45,
     };
@@ -175,11 +198,22 @@ async function seedIncidents(ids) {
 
 async function seedAssignments(incidents, ids) {
   const assignments = [];
-  const assignableStatuses = ['assigned', 'in_progress', 'resolved'];
+  const assignableStatuses = ['assigned', 'en_route', 'near_scene', 'on_site', 'resolving', 'in_progress', 'resolved'];
   for (const inc of incidents) {
     if (!assignableStatuses.includes(inc.status)) continue;
     const responderId = pick(ids.responders);
-    const status = inc.status === 'resolved' ? (Math.random() > 0.5 ? 'completed' : 'on_site') : inc.status === 'in_progress' ? pick(['en_route', 'on_site']) : pick(['pending', 'accepted']);
+    const status =
+      inc.status === 'resolved'
+        ? 'completed'
+        : inc.status === 'resolving'
+          ? 'resolving'
+          : inc.status === 'on_site'
+            ? 'on_site'
+            : inc.status === 'near_scene'
+              ? 'near_scene'
+              : inc.status === 'en_route' || inc.status === 'in_progress'
+                ? pick(['en_route', 'near_scene'])
+                : pick(['pending', 'accepted']);
     const assignedAt = inc.reportedAt ? new Date(inc.reportedAt.getTime() + 25 * 60000) : new Date();
     const a = await Assignment.create({
       incidentId: inc._id,

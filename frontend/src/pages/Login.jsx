@@ -88,17 +88,21 @@ export function Login() {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="min-h-screen bg-ers-bg flex flex-col lg:flex-row"
+      className="min-h-screen bg-slate-50 flex flex-col lg:flex-row"
     >
-      {/* Left: form – no card, custom typography */}
+      {/* Left: form */}
       <div className="flex-1 flex flex-col justify-center px-5 sm:px-8 lg:px-14 xl:px-20 py-12 lg:py-16">
         <div className="w-full max-w-sm mx-auto lg:mx-0">
-          <div className="mb-6">
-            <div className="w-11 h-11 rounded-xl bg-emergency-50 flex items-center justify-center mb-4">
-              <AlertCircle className="w-5 h-5 text-emergency-600" aria-hidden />
+          <div className="mb-8">
+            <div className="flex items-center gap-3 mb-6">
+              <img src="/images/ers-logo.png" alt="" className="w-10 h-10 rounded-lg object-contain" />
+              <div>
+                <span className="text-sm font-bold text-slate-900 tracking-tight">ERS Kenya</span>
+                <span className="block text-[10px] font-medium text-slate-400 uppercase tracking-wider">Emergency Response</span>
+              </div>
             </div>
-            <h1 className="text-display-lg text-ers-ink">Log in</h1>
-            <p className="text-caption text-ers-inkTertiary mt-0.5">Emergency Response Coordination</p>
+            <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Welcome back</h1>
+            <p className="text-sm text-slate-500 mt-1">Sign in to your account to continue.</p>
           </div>
           <form onSubmit={handleSubmit} className="space-y-4">
             <Input
@@ -133,15 +137,17 @@ export function Login() {
         </div>
       </div>
 
-      {/* Right: demo accounts – editorial panel */}
-      <div className="lg:w-[360px] xl:w-[380px] shrink-0 border-t lg:border-t-0 lg:border-l border-ers-subtle bg-ers-surface/50 flex flex-col">
+      {/* Right: demo accounts */}
+      <div className="lg:w-[380px] xl:w-[400px] shrink-0 border-t lg:border-t-0 lg:border-l border-slate-200 bg-white flex flex-col">
         <div className="p-5 sm:p-6 flex-1 flex flex-col min-h-0">
-          <div className="flex items-center gap-2 mb-4">
-            <Users className="w-5 h-5 text-ers-inkTertiary" aria-hidden />
-            <h2 className="text-h4 text-ers-ink font-semibold">Try the system</h2>
+          <div className="flex items-center gap-2.5 mb-4">
+            <div className="w-8 h-8 rounded-lg bg-sky-100 flex items-center justify-center">
+              <Users className="w-4 h-4 text-sky-600" aria-hidden />
+            </div>
+            <h2 className="text-sm font-bold text-slate-900">Demo accounts</h2>
           </div>
-          <p className="text-body-sm text-ers-inkSecondary mb-4">
-            Use a demo account to explore. Select a role and click Use to fill the form.
+          <p className="text-xs text-slate-500 mb-4 leading-relaxed">
+            Try different roles. Select a role tab and click Use to auto-fill the login form.
           </p>
           {demoLoading ? (
             <div className="flex items-center justify-center py-16 text-ers-inkTertiary">
