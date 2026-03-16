@@ -1,0 +1,137 @@
+{
+  "sceneId": "hero-emergency-command-scene",
+  "name": "Kenya Emergency Command Scene",
+  "style": {
+    "theme": "soft-isometric-premium",
+    "background": "#F6F1E8",
+    "accentPrimary": "#E53935",
+    "accentSecondary": "#0F766E",
+    "accentWarning": "#D97706",
+    "surface": "#FFF8F1",
+    "shadow": "soft"
+  },
+  "camera": {
+    "type": "perspective",
+    "position": [7, 5, 9],
+    "fov": 32,
+    "lookAt": [0, 1.4, 0]
+  },
+  "lights": {
+    "ambient": { "intensity": 1.1, "color": "#ffffff" },
+    "directional": { "position": [6, 8, 4], "intensity": 1.8, "color": "#fff5e6" },
+    "rim": { "position": [-4, 5, -2], "intensity": 0.9, "color": "#dbeafe" }
+  },
+  "ground": {
+    "type": "roundedPlatform",
+    "size": [8, 0.4, 8],
+    "position": [0, -0.2, 0],
+    "color": "#F3E8D7"
+  },
+  "objects": [
+    {
+      "id": "dispatchDesk",
+      "type": "roundedBox",
+      "position": [-1.2, 0.6, 0.3],
+      "scale": [2.2, 1.2, 1.4],
+      "color": "#F8DCC8",
+      "radius": 0.18
+    },
+    {
+      "id": "mainScreen",
+      "type": "roundedBox",
+      "position": [-1.1, 1.7, -0.1],
+      "scale": [1.4, 1.0, 0.12],
+      "color": "#CDE7F6",
+      "radius": 0.12
+    },
+    {
+      "id": "cityBlock",
+      "type": "group",
+      "position": [1.5, 0.35, 0],
+      "children": [
+        {
+          "id": "hospital",
+          "type": "building",
+          "position": [0, 0.9, 0],
+          "scale": [1.0, 1.8, 1.0],
+          "color": "#FFE0E0",
+          "radius": 0.16
+        },
+        {
+          "id": "officeTower",
+          "type": "building",
+          "position": [1.1, 1.25, -0.2],
+          "scale": [0.9, 2.5, 0.9],
+          "color": "#F9D8A8",
+          "radius": 0.16
+        },
+        {
+          "id": "apartmentBlock",
+          "type": "building",
+          "position": [-1.0, 0.8, 0.3],
+          "scale": [1.0, 1.6, 1.0],
+          "color": "#D8E8D8",
+          "radius": 0.16
+        }
+      ]
+    },
+    {
+      "id": "ambulance",
+      "type": "vehicle",
+      "position": [0.4, 0.25, 1.2],
+      "scale": [0.9, 0.9, 0.9],
+      "color": "#ffffff",
+      "accent": "#E53935"
+    },
+    {
+      "id": "fireTruck",
+      "type": "vehicle",
+      "position": [1.6, 0.25, 1.15],
+      "scale": [1.05, 1.05, 1.05],
+      "color": "#E53935",
+      "accent": "#ffffff"
+    },
+    {
+      "id": "policeUnit",
+      "type": "vehicle",
+      "position": [2.5, 0.25, 0.9],
+      "scale": [0.92, 0.92, 0.92],
+      "color": "#2563EB",
+      "accent": "#ffffff"
+    },
+    {
+      "id": "dispatcher",
+      "type": "character",
+      "position": [-1.6, 1.15, 0.45],
+      "scale": [0.95, 0.95, 0.95],
+      "role": "dispatcher",
+      "pose": "dispatcherDesk"
+    },
+    {
+      "id": "beacon",
+      "type": "beacon",
+      "position": [0.25, 2.1, 1.0],
+      "scale": [0.7, 0.7, 0.7],
+      "color": "#E53935"
+    },
+    {
+      "id": "kenyaPinCluster",
+      "type": "pins",
+      "position": [1.5, 2.3, 0.2],
+      "count": 3,
+      "color": "#0F766E"
+    }
+  ],
+  "animations": {
+    "floatGroup": { "target": "sceneRoot", "y": 0.12, "duration": 3.8, "repeat": -1, "yoyo": true, "ease": "sine.inOut" },
+    "beaconPulse": { "target": "beacon", "scale": [1, 1.12, 1], "duration": 1.2, "repeat": -1, "ease": "power1.inOut" },
+    "vehicleBob": { "targets": ["ambulance", "fireTruck", "policeUnit"], "y": 0.04, "duration": 2.4, "stagger": 0.25, "repeat": -1, "yoyo": true }
+  },
+  "gsap": {
+    "heroEntrance": {
+      "text": { "from": { "opacity": 0, "y": 40 }, "to": { "opacity": 1, "y": 0, "duration": 1.0, "stagger": 0.12 } },
+      "scene": { "from": { "opacity": 0, "scale": 0.92, "y": 30 }, "to": { "opacity": 1, "scale": 1.0, "y": 0, "duration": 1.2, "ease": "power3.out" } }
+    }
+  }
+}
+

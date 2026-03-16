@@ -1,0 +1,176 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=Sora:wght@100..800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ——— Design system: CSS variables (from tokens) ——— */
+:root {
+  --ers-bg: #f8fafc;
+  --ers-surface: #f1f5f9;
+  --ers-elevated: #ffffff;
+  --ers-subtle: #e2e8f0;
+  --ers-ink: #0f172a;
+  --ers-ink-secondary: #475569;
+  --ers-ink-tertiary: #94a3b8;
+  --ers-emergency: #dc2626;
+  --ers-brand: #0ea5e9;
+  /* Radius scale (unified) */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.25rem;
+  /* Spacing */
+  --space-page-x: 1rem;
+  --space-page-y: 1.5rem;
+  --space-section: 5rem;
+}
+
+@layer base {
+  html {
+    @apply antialiased scroll-smooth;
+  }
+  body {
+    @apply bg-ers-bg text-ers-ink min-h-screen font-sans text-body;
+  }
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-emergency-600;
+  }
+}
+
+/* ——— Typography utilities (display + body pairing) ——— */
+@layer components {
+  /* Headings: use font-display (explicit font-size to avoid circular @apply) */
+  .text-hero {
+    font-size: clamp(2.5rem, 5vw + 1.5rem, 4rem);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    @apply font-display font-bold text-ers-ink;
+  }
+  .text-display-lg {
+    font-size: clamp(2rem, 4vw + 1rem, 3rem);
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    @apply font-display font-semibold text-ers-ink;
+  }
+  .text-h1 {
+    font-size: 1.75rem;
+    line-height: 1.25;
+    @apply font-display font-semibold text-ers-ink tracking-tight;
+  }
+  .text-h2 {
+    font-size: 1.5rem;
+    line-height: 1.3;
+    @apply font-display font-semibold text-ers-ink tracking-tight;
+  }
+  .text-h3 {
+    font-size: 1.25rem;
+    line-height: 1.35;
+    @apply font-display font-semibold text-ers-ink tracking-tight;
+  }
+  .text-h4 {
+    font-size: 1.125rem;
+    line-height: 1.4;
+    @apply font-display font-semibold text-ers-ink tracking-tight;
+  }
+  /* Body: use font-sans */
+  .text-body-lg {
+    font-size: 1.125rem;
+    line-height: 1.6;
+    @apply font-sans text-ers-ink;
+  }
+  .text-body {
+    font-size: 1rem;
+    line-height: 1.6;
+    @apply font-sans text-ers-ink;
+  }
+  .text-body-sm {
+    font-size: 0.875rem;
+    line-height: 1.5;
+    @apply font-sans text-ers-inkSecondary;
+  }
+  .text-caption {
+    font-size: 0.75rem;
+    line-height: 1.4;
+    @apply font-sans text-ers-inkTertiary;
+  }
+  .text-btn {
+    font-size: 0.875rem;
+    line-height: 1.25;
+    @apply font-sans font-medium text-ers-ink;
+  }
+  .text-label {
+    font-size: 0.875rem;
+    line-height: 1.5;
+    @apply font-sans font-medium text-ers-inkSecondary;
+  }
+
+  /* ——— Surfaces (unified card/panel) ——— */
+  .surface-card {
+    @apply rounded-xl bg-white border border-slate-200/80 shadow-sm;
+  }
+  .surface-card-hover {
+    @apply surface-card transition-all duration-200 hover:shadow-md hover:border-slate-300;
+  }
+  .surface-panel {
+    @apply rounded-xl bg-slate-50 border border-slate-200;
+  }
+  .surface-subtle {
+    @apply rounded-lg bg-slate-50 border border-slate-200;
+  }
+
+  /* Legacy aliases (map to new) */
+  .ers-card {
+    @apply surface-card;
+  }
+  .ers-card-hover {
+    @apply surface-card-hover;
+  }
+
+  /* Input (unified radius lg) */
+  .ers-input {
+    @apply w-full px-4 py-3 rounded-lg border border-slate-200 bg-white text-body text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all duration-200;
+  }
+  .ers-input-touch {
+    @apply min-h-[48px] py-3.5;
+  }
+
+  /* Page layout titles */
+  .page-title {
+    @apply text-h1 truncate;
+  }
+  .page-subtitle {
+    @apply text-body-sm text-ers-inkSecondary mt-0.5 truncate;
+  }
+
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px] flex items-center justify-center;
+  }
+}
+
+/* Leaflet – light theme */
+.leaflet-container {
+  @apply font-sans bg-ers-surface;
+  height: 100% !important;
+  width: 100% !important;
+  min-height: 200px;
+}
+.leaflet-popup-content-wrapper {
+  @apply bg-ers-elevated border border-ers-subtle rounded-lg text-ers-ink shadow-ers-md;
+}
+.leaflet-popup-tip {
+  @apply bg-ers-elevated;
+}
+.ers-marker,
+.emergency-marker,
+.responder-marker,
+.tracking-incident-marker,
+.tracking-responder-marker,
+.location-picker-marker {
+  background: transparent !important;
+  border: none !important;
+}
+.leaflet-container a.leaflet-popup-close-button {
+  @apply text-ers-inkTertiary hover:text-ers-ink text-2xl w-10 h-10 flex items-center justify-center;
+}

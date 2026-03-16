@@ -1,130 +1,103 @@
-**Incident Response System**
+# Emergency Response Coordination System
 
-An incident response management system developed collaboratively, featuring automated workflows, role-based access control, and a CI/CD pipeline for continuous integration and deployment.
+Full-stack system for reporting emergencies, validating and prioritizing incidents, assigning responders, and tracking response times with alerts and audit trails.
 
-**Overview**
+## Overview
 
-The Incident Response System is a collaborative platform designed to support structured and secure incident management.
-The system enables teams to:
-Report incidents in real time
-Assign and track responsibilities
-Monitor status progression
-Maintain accountability and secure data handling
-The project follows industry-standard DevOps practices by integrating a CI/CD pipeline to ensure reliability, code quality, and smooth deployment.
+- **Reporters** register, log in, and create incidents with location coordinates.
+- **Admins** validate and prioritize incidents, assign responders using nearest-unit recommendations.
+- **Responders** receive assignments and update incident status.
+- **Supervisors** view alerts and audit logs for escalation and accountability.
+- The system generates alerts when response time rules are exceeded and records all actions in an immutable audit log.
 
-**Features**
+## Tech Stack
 
-Incident reporting and tracking
-Role-based access control (Administrator, Responder)
-Incident status updates and escalation
-Notification and alert mechanisms
-Secure data handling and authentication
-Automated testing and deployment (CI/CD)
+| Layer     | Technology |
+|----------|------------|
+| Frontend | React 19, Vite, Tailwind CSS, Framer Motion, React Router, Leaflet |
+| Backend  | Node.js, Express 5, MongoDB (Mongoose) |
+| Auth     | JWT, role-based access control |
+| Maps     | Browser Geolocation, Leaflet / react-leaflet |
 
-**Technology Stack**
+## Project Structure
 
-Layer	Technology Used
-Frontend	React
-Backend	Node.js / Express
-Database	MongoDB
-Version Control	Git & GitHub
-CI/CD	GitHub Actions
-Deployment	Render 
-CI/CD Pipeline
+- `frontend/` — React + Vite app; `src/api`, `src/components`, `src/context`, `src/pages`, `src/routes`
+- `backend/` — Express API; `src/config`, `src/models`, `src/middleware`, `src/routes`, `src/controllers`, `src/services`
+- `ARCHITECTURE.md` — Detailed architecture and folder layout
 
-This project implements a CI/CD (Continuous Integration and Continuous Deployment) pipeline using GitHub Actions to automate testing, validation, and deployment of the system.
+## Installation
 
-The goal of this pipeline is to reduce human error, maintain code quality, and ensure that the production system remains stable and reliable.
+### Prerequisites
 
-**Continuous Integration (CI)**
+- Node.js 18+
+- MongoDB (local or Atlas)
 
-The Continuous Integration process ensures that every code change is automatically tested before being merged.
-When a developer:
-Pushes code to a branch
-Opens a Pull Request
-GitHub Actions automatically:
-Installs project dependencies
-Builds the application
-Runs automated tests
-Verifies that the project compiles successfully
-If any step fails, the merge is blocked.
-Additionally:
-The develop branch is protected to ensure integration remains stable.
-The main branch is protected to prevent untested or unstable code from reaching production.
-This guarantees that only validated code is merged.
+### Backend
 
-**Continuous Deployment (CD)**
-After all tests pass successfully:
-Code merged into the main branch is automatically deployed.
-The production environment is updated without manual intervention.
-
-This ensures:
-Faster and consistent releases
-Reduced deployment errors
-A production system that is always synchronized with the latest stable version
-By automating deployment, the team avoids manual deployment mistakes and maintains system reliability.
-
-**Why This CI/CD Pipeline Matters**
-
-This pipeline:
-Enforces structured collaboration
-Detects errors early
-Prevents broken code from reaching production
-Maintains audit readiness
-Supports professional DevOps practices
-
-**Branching Strategy**
-Branch	Purpose
-main	Stable production-ready code
-develop	Integration and active development
-feature/*	Feature-specific development branches
-
-**Direct commits to main are not allowed.**
-All changes must go through Pull Requests and pass CI checks before merging.
-
-**Installation & Setup**
-1️⃣ Clone the Repository
-git clone https://github.com/kamuyaaa/Incident-Response-System-.git
-cd Incident-Response-System-
-
-**Install Dependencies**
-Backend
+```bash
 cd backend
 npm install
+cp .env.example .env
+# Edit .env: MONGO_URI, PORT (default 10000), JWT_SECRET (min 32 chars)
+npm run dev
+```
 
-Frontend
+Seed response-time rules (required for alerts):
+
+```bash
+node scripts/seed-response-rules.js
+```
+
+### Frontend
+
+```bash
 cd frontend
 npm install
+npm run dev
+```
 
-**Configure Environment Variables**
-Create a .env file in the backend directory:
+Frontend runs at http://localhost:5173 and proxies `/api` to the backend (default http://localhost:10000).
 
-MONGO_URI=your_mongodb_connection_string
-PORT=5000
-JWT_SECRET=your_secret_key
+## Environment
 
-**Run the Application**
-Start Backend
-npm start
+**Backend (`.env`):**
 
-Start Frontend
-npm start
+- `PORT` — Server port (default 10000)
+- `MONGO_URI` — MongoDB connection string
+- `JWT_SECRET` — Secret for JWT signing (use a long random string in production)
 
-**Development Workflow**
-Create a new feature branch
-Develop and commit changes
-Open a Pull Request to develop
-CI runs automated tests
-After approval and passing checks, merge
-main branch deploys automatically
+## User Roles
 
-**Future Improvements**
+| Role       | Capabilities |
+|-----------|---------------|
+| REPORTER  | Register, login, create incidents, provide location |
+| ADMIN     | Validate/prioritize incidents, assign responders, view alerts and audit |
+| RESPONDER | View assignments, update incident/assignment status |
+| SUPERVISOR| Alerts, audit log, dashboard escalation |
 
-Real-time incident notifications
-Dashboard analytics and reporting
-Improved mobile responsiveness
-Integration with external emergency response APIs
+## API Overview
 
-**License**
+- `POST /api/auth/register` — Register (email, password, name, role)
+- `POST /api/auth/login` — Login (email, password) → `{ user, token }`
+- `GET /api/auth/me` — Current user (Bearer token)
+- `GET/POST /api/incidents` — List, create incidents
+- `GET/PATCH /api/incidents/:id` — Get, update incident (status, priority)
+- `GET /api/assignments/recommend/:incidentId` — Nearest available responders
+- `POST /api/assignments` — Assign responder (incidentId, responderId)
+- `GET /api/assignments/my` — Responder’s assignments
+- `PATCH /api/assignments/:id/status` — Update assignment status
+- `GET /api/alerts`, `PATCH /api/alerts/:id/acknowledge`
+- `GET /api/audit` — Paginated audit log
+- `GET /api/users/responders` — List responders (admin/supervisor)
 
-This project is developed for academic and educational purposes.
+## Branching & CI/CD
+
+- **main** — Production-ready code
+- **develop** — Integration branch
+- **feature/*** — Feature branches
+
+CI runs on push/PR (see `.github/workflows/ci.yml`). Direct commits to `main` should be avoided; use Pull Requests and pass checks before merging.
+
+## License
+
+MIT.
