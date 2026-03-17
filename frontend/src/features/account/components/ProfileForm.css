@@ -1,0 +1,62 @@
+.profile-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.profile-field label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 0.95rem;
+  color: #222;
+}
+
+.profile-input-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.profile-input-row input {
+  flex: 1;
+  height: 44px;
+  border: 1px solid #9f9f9f;
+  border-radius: 999px;
+  padding: 0 16px;
+  font-size: 1rem;
+  outline: none;
+  background: transparent;
+  box-sizing: border-box;
+}
+
+.edit-icon {
+  font-size: 1.2rem;
+  color: #111;
+  cursor: pointer;
+  min-width: 20px;
+}
+
+.profile-save-btn {
+  margin-top: 18px;
+  width: 100%;
+  height: 42px;
+  border: none;
+  border-radius: 999px;
+  background: #de1a1a;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.profile-cancel-btn {
+  width: 100%;
+  height: 42px;
+  border: 1.5px solid #222;
+  border-radius: 999px;
+  background: #fff;
+  color: #111;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+}
