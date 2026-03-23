@@ -1,18 +1,20 @@
-const express = require('express');
-const cors = require('cors');
-require('dotenv').config();
+const createApp = require('./src/app/createApp');
+const { PORT } = require('./src/shared/config/env');
+const connectToDatabase = require('./src/shared/database/connectToDatabase');
+const seedDatabase = require('./src/shared/database/seedDatabase');
 
-const app = express();
-const PORT = process.env.PORT || 10000; // Matches Render's port
+const app = createApp();
 
-app.use(cors());
-app.use(express.json());
+async function startServer() {
+  await connectToDatabase();
+  await seedDatabase();
 
-// A simple route so we can test the URL
-app.get('/', (req, res) => {
-  res.send('Incident Response API is running...');
-});
+  app.listen(PORT, () => {
+    console.log(`Server is live on port ${PORT}`);
+  });
+}
 
-app.listen(PORT, () => {
-  console.log(`Server is live on port ${PORT}`);
+startServer().catch((error) => {
+  console.error('Failed to start server', error);
+  process.exit(1);
 });

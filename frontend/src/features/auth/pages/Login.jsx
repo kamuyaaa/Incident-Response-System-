@@ -1,19 +1,24 @@
 import PhoneFrame from "../../../shared/components/PhoneFrame";
 import "./Login.css";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useState } from "react";
 import logo from "../../../assets/logo.png";
-import { Link } from "react-router-dom";
-
+import { useAuth } from "../../../shared/hooks/useAuth";
+import authService from "../services/authService";
 
 export default function Login() {
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const [form, setForm] = useState({
     email: "",
     password: "",
+    role: "reporter",
     remember: false,
   });
+
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
 
   const handleChange = (e) => {
     const { id, type, value, checked } = e.target;
@@ -24,11 +29,28 @@ export default function Login() {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitting(true);
+    setError("");
 
-    // for now, just redirect after fields are filled
-    navigate("/reporter");
+    try {
+      const response = await authService.login({
+        email: form.email,
+        password: form.password,
+      });
+
+      if (response.user.role !== form.role) {
+        throw new Error(`This account is registered as ${response.user.role}, not ${form.role}`);
+      }
+
+      login(response.user, response.token);
+      navigate(`/${response.user.role}`);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -39,7 +61,23 @@ export default function Login() {
 
           <h1 className="login-title">Welcome Back</h1>
 
+          {error && <p className="form-error">{error}</p>}
+
           <form onSubmit={handleSubmit}>
+            <div className="login-field">
+              <label htmlFor="role">Role</label>
+              <select
+                id="role"
+                value={form.role}
+                onChange={handleChange}
+                required
+              >
+                <option value="reporter">Reporter</option>
+                <option value="responder">Responder</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+
             <div className="login-field">
               <label htmlFor="email">E-mail</label>
               <input
@@ -83,8 +121,8 @@ export default function Login() {
               </p>
             </div>
 
-            <button className="login-btn" type="submit">
-              LOGIN
+            <button className="login-btn" type="submit" disabled={submitting}>
+              {submitting ? "LOGGING IN..." : "LOGIN"}
             </button>
           </form>
 

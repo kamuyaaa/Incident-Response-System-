@@ -1,7 +1,8 @@
 import "./Dashboard.css";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { MapContainer, Marker, Popup, TileLayer, Polyline } from "react-leaflet";
 import L from "leaflet";
+import adminService from "../services/adminService";
 
 // Fix default Leaflet marker icons in Vite/React
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
@@ -15,92 +16,69 @@ L.Icon.Default.mergeOptions({
   shadowUrl: markerShadow,
 });
 
-const mockIncidents = [
-  {
-    id: "INC-1001",
-    type: "Medical Emergency",
-    location: "TRM, Thika Road",
-    priority: "High",
-    status: "Unassigned",
-    time: "3 mins ago",
-    coords: [-1.2186, 36.8856],
-  },
-  {
-    id: "INC-1002",
-    type: "Fire & Rescue",
-    location: "Eastleigh, Nairobi",
-    priority: "Critical",
-    status: "Assigned",
-    time: "8 mins ago",
-    coords: [-1.2756, 36.8523],
-  },
-  {
-    id: "INC-1003",
-    type: "Road & Transport",
-    location: "Muthaiga Roundabout",
-    priority: "Medium",
-    status: "Unassigned",
-    time: "12 mins ago",
-    coords: [-1.2445, 36.8348],
-  },
-];
-
-const mockResponders = [
-  {
-    id: "R-01",
-    name: "Jack Doe",
-    unit: "Ambulance 2",
-    status: "Available",
-    location: "TRM Area",
-    coords: [-1.2202, 36.8817],
-  },
-  {
-    id: "R-02",
-    name: "Mary Wanjiru",
-    unit: "Fire Unit 1",
-    status: "Dispatched",
-    location: "Eastleigh",
-    coords: [-1.2734, 36.8571],
-  },
-  {
-    id: "R-03",
-    name: "Kevin Otieno",
-    unit: "Traffic Unit 4",
-    status: "Available",
-    location: "CBD",
-    coords: [-1.2867, 36.8172],
-  },
-];
-
 export default function Dashboard() {
-  const [incidents, setIncidents] = useState(mockIncidents);
+  const [incidents, setIncidents] = useState([]);
+  const [responders, setResponders] = useState([]);
   const [selectedIncident, setSelectedIncident] = useState(null);
   const [selectedResponder, setSelectedResponder] = useState("");
+  const [loading, setLoading] = useState(true);
 
   const selectedResponderData = useMemo(
-    () => mockResponders.find((responder) => responder.id === selectedResponder) || null,
-    [selectedResponder]
+    () => responders.find((responder) => responder.id === selectedResponder) || null,
+    [responders, selectedResponder]
   );
 
   const center = [-1.2864, 36.8172];
 
-  const handleAssign = () => {
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const [incidentsData, respondersData] = await Promise.all([
+          adminService.getIncidentsQueue(),
+          adminService.getResponders(),
+        ]);
+
+        setIncidents(incidentsData);
+        setResponders(respondersData);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadData();
+  }, []);
+
+  const handleAssign = async () => {
     if (!selectedIncident || !selectedResponder) return;
 
-    setIncidents((prev) =>
-      prev.map((incident) =>
-        incident.id === selectedIncident.id
-          ? {
-              ...incident,
-              status: "Assigned",
-            }
-          : incident
-      )
-    );
+    try {
+      const response = await adminService.assignResponder(
+        selectedIncident.id,
+        selectedResponder
+      );
 
-    setSelectedIncident(null);
-    setSelectedResponder("");
+      setIncidents((prev) =>
+        prev.map((incident) =>
+          incident.id === selectedIncident.id ? response.incident : incident
+        )
+      );
+
+      setSelectedIncident(null);
+      setSelectedResponder("");
+    } catch (error) {
+      alert(error.message);
+    }
   };
+
+  const unassignedCount = incidents.filter((i) => i.status === "Unassigned").length;
+  const assignedCount = incidents.filter((i) => i.status === "Assigned").length;
+  const completedCount = incidents.filter((i) => i.status === "Completed").length;
+
+  if (loading) {
+    return <div className="admin-dashboard">Loading dashboard...</div>;
+  }
 
   return (
     <div className="admin-dashboard">
@@ -114,22 +92,22 @@ export default function Dashboard() {
       <div className="admin-summary-grid">
         <div className="summary-box">
           <h3>Total Incidents</h3>
-          <p>24</p>
+          <p>{incidents.length}</p>
         </div>
 
         <div className="summary-box">
           <h3>Unassigned</h3>
-          <p>7</p>
+          <p>{unassignedCount}</p>
         </div>
 
         <div className="summary-box">
           <h3>Active Dispatches</h3>
-          <p>11</p>
+          <p>{assignedCount}</p>
         </div>
 
         <div className="summary-box">
-          <h3>Resolved Today</h3>
-          <p>6</p>
+          <h3>Resolved</h3>
+          <p>{completedCount}</p>
         </div>
       </div>
 
@@ -155,8 +133,8 @@ export default function Dashboard() {
 
                 <div className="incident-meta">
                   <span>{incident.id}</span>
-                  <span>{incident.time}</span>
-                  <span className={`status-tag ${incident.status.toLowerCase()}`}>
+                  <span>{new Date(incident.createdAt).toLocaleString()}</span>
+                  <span className={`status-tag ${incident.status.toLowerCase().replace(/\s+/g, "-")}`}>
                     {incident.status}
                   </span>
                 </div>
@@ -166,9 +144,7 @@ export default function Dashboard() {
                   onClick={() => setSelectedIncident(incident)}
                   disabled={incident.status === "Assigned"}
                 >
-                  {incident.status === "Assigned"
-                    ? "Already Assigned"
-                    : "Assign Responder"}
+                  {incident.status === "Assigned" ? "Already Assigned" : "Assign Responder"}
                 </button>
               </div>
             ))}
@@ -181,19 +157,17 @@ export default function Dashboard() {
           </div>
 
           <div className="dashboard-map-wrap">
-            <MapContainer
-              center={center}
-              zoom={12}
-              scrollWheelZoom={true}
-              className="dashboard-map"
-            >
+            <MapContainer center={center} zoom={12} scrollWheelZoom className="dashboard-map">
               <TileLayer
                 attribution="&copy; OpenStreetMap contributors"
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               />
 
-              {incidents.map((incident) => (
-                <Marker key={incident.id} position={incident.coords}>
+              {incidents.map((incident, index) => (
+                <Marker
+                  key={incident.id}
+                  position={incident.coords || [center[0] + index * 0.01, center[1] + index * 0.01]}
+                >
                   <Popup>
                     <strong>{incident.type}</strong>
                     <br />
@@ -206,8 +180,11 @@ export default function Dashboard() {
                 </Marker>
               ))}
 
-              {mockResponders.map((responder) => (
-                <Marker key={responder.id} position={responder.coords}>
+              {responders.map((responder, index) => (
+                <Marker
+                  key={responder.id}
+                  position={responder.coords || [center[0] - index * 0.01, center[1] - index * 0.01]}
+                >
                   <Popup>
                     <strong>{responder.name}</strong>
                     <br />
@@ -220,14 +197,14 @@ export default function Dashboard() {
                 </Marker>
               ))}
 
-              {selectedIncident && selectedResponderData && (
+              {selectedIncident && selectedResponderData && selectedIncident.coords && selectedResponderData.coords && (
                 <Polyline positions={[selectedResponderData.coords, selectedIncident.coords]} />
               )}
             </MapContainer>
           </div>
 
           <div className="responder-list">
-            {mockResponders.map((responder) => (
+            {responders.map((responder) => (
               <div key={responder.id} className="responder-row">
                 <div>
                   <h4>{responder.name}</h4>
@@ -259,13 +236,11 @@ export default function Dashboard() {
               onChange={(e) => setSelectedResponder(e.target.value)}
             >
               <option value="">Select responder</option>
-              {mockResponders
-                .filter((r) => r.status === "Available")
-                .map((responder) => (
-                  <option key={responder.id} value={responder.id}>
-                    {responder.name} - {responder.unit}
-                  </option>
-                ))}
+              {responders.map((responder) => (
+                <option key={responder.id} value={responder.id}>
+                  {responder.name} - {responder.unit}
+                </option>
+              ))}
             </select>
 
             <div className="modal-actions">

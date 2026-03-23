@@ -60,6 +60,16 @@
   color: #9b9b9b;
 }
 
+.login-field select {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid #dcdcdc;
+  font-size: 14px;
+  outline: none;
+  background: #fff;
+}
+
 .login-options {
   width: 100%;
   display: flex;
@@ -114,4 +124,11 @@
   color: #e01919;
   cursor: pointer;
   font-weight: 500;
+}
+
+.form-error {
+  color: #d93025;
+  font-size: 14px;
+  margin-bottom: 12px;
+  text-align: center;
 }
