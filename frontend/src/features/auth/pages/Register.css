@@ -1,0 +1,100 @@
+.register-page {
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 42px 18px 24px;
+  box-sizing: border-box;
+  background: #f3f3f3;
+}
+
+.register-card {
+  width: 100%;
+  max-width: 290px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: left;
+}
+
+.register-logo {
+  width: 90px;
+  height: 90px;
+  object-fit: contain;
+  margin-bottom: 14px;
+}
+
+.register-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #111;
+  margin-bottom: 22px;
+  text-align: center;
+}
+
+.register-card form {
+  width: 100%;
+}
+
+.register-field {
+  width: 100%;
+  margin-bottom: 14px;
+}
+
+.register-field label {
+  display: block;
+  font-size: 0.95rem;
+  color: #222;
+  margin-bottom: 8px;
+}
+
+.register-field input,
+.register-field select {
+  width: 100%;
+  height: 44px;
+  border: 1px solid #8e8e8e;
+  border-radius: 999px;
+  padding: 0 16px;
+  font-size: 1rem;
+  background: transparent;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.register-field input::placeholder {
+  color: #9b9b9b;
+}
+
+.register-field select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  cursor: pointer;
+}
+
+.register-btn {
+  width: 100%;
+  height: 44px;
+  border: none;
+  border-radius: 999px;
+  background: #df161c;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 10px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+
+.login-text {
+  font-size: 0.95rem;
+  color: #222;
+  text-align: center;
+  margin: 20px 0 0;
+}
+
+.login-text span {
+  color: #e01919;
+  cursor: pointer;
+  font-weight: 500;
+}
