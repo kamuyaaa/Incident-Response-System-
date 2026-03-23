@@ -1,10 +1,12 @@
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../../shared/hooks/useAuth";
 import "./ReporterMenu.css";
 
 export default function ReporterMenu() {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
 
   const touchStartX = useRef(0);
   const touchEndX = useRef(0);
@@ -53,8 +55,8 @@ export default function ReporterMenu() {
         <div className="menu-header">
           <div className="menu-user-icon">◉</div>
           <div>
-            <h3>John Doe</h3>
-            <p>johndoe@example.com</p>
+            <h3>{user?.name ?? user?.fullname ?? "Your Account"}</h3>
+            <p>{user?.email ?? "No email available"}</p>
           </div>
         </div>
 
@@ -102,7 +104,13 @@ export default function ReporterMenu() {
 
         <p className="menu-section danger-title">DANGER ZONE</p>
 
-        <button className="menu-item danger" onClick={() => goTo("/login")}>
+        <button
+          className="menu-item danger"
+          onClick={() => {
+            logout();
+            goTo("/login");
+          }}
+        >
           <span>LOGOUT</span>
           <span>›</span>
         </button>

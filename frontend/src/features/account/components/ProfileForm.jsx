@@ -1,49 +1,114 @@
-import { useRef } from "react";
-import "./ProfileAvatar.css";
+import { useState } from "react";
+import "./ProfileForm.css";
 
-export default function ProfileAvatar({ profilePhoto, onPhotoChange }) {
-  const fileInputRef = useRef(null);
+export default function ProfileForm({ initialData, onSave, onCancel }) {
+  const [formData, setFormData] = useState({
+    fullname: initialData?.fullname ?? initialData?.name ?? "",
+    email: initialData?.email ?? "",
+    phone: initialData?.phone ?? "",
+    password: initialData?.password ?? "",
+  });
 
-  const handlePickImage = () => {
-    fileInputRef.current?.click();
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
-  const handleFileChange = (e) => {
-    const file = e.target.files?.[0];
-    if (file && onPhotoChange) {
-      onPhotoChange(file);
-    }
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSave(formData);
   };
 
   return (
-    <div className="profile-avatar-section">
-      <div className="profile-avatar-wrap" onClick={handlePickImage}>
-        {profilePhoto ? (
-          <img
-            src={profilePhoto}
-            alt="Profile"
-            className="profile-avatar-image"
+    <form className="profile-form" onSubmit={handleSubmit}>
+      <div className="profile-field">
+        <label htmlFor="fullname">Full name</label>
+        <div className="profile-input-row">
+          <input
+            id="fullname"
+            name="fullname"
+            type="text"
+            value={formData.fullname}
+            onChange={handleChange}
+            placeholder="Your full name"
+            required
           />
-        ) : (
-          <div className="profile-avatar-placeholder">📷</div>
-        )}
+          <span className="edit-icon" aria-hidden="true">
+            ✎
+          </span>
+        </div>
       </div>
 
-      <button
-        type="button"
-        className="change-photo-btn"
-        onClick={handlePickImage}
-      >
-        Change Profile Photo
-      </button>
+      <div className="profile-field">
+        <label htmlFor="email">Email</label>
+        <div className="profile-input-row">
+          <input
+            id="email"
+            name="email"
+            type="email"
+            value={formData.email}
+            onChange={handleChange}
+            placeholder="you@example.com"
+            required
+          />
+          <span className="edit-icon" aria-hidden="true">
+            ✎
+          </span>
+        </div>
+      </div>
 
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*"
-        className="hidden-file-input"
-        onChange={handleFileChange}
-      />
-    </div>
+      <div className="profile-field">
+        <label htmlFor="phone">Phone</label>
+        <div className="profile-input-row">
+          <input
+            id="phone"
+            name="phone"
+            type="text"
+            value={formData.phone}
+            onChange={handleChange}
+            placeholder="+254 700 000 000"
+            required
+          />
+          <span className="edit-icon" aria-hidden="true">
+            ✎
+          </span>
+        </div>
+      </div>
+
+      <div className="profile-field">
+        <label htmlFor="password">Password</label>
+        <div className="profile-input-row">
+          <input
+            id="password"
+            name="password"
+            type="password"
+            value={formData.password}
+            onChange={handleChange}
+            placeholder="**********"
+            required
+          />
+          <span className="edit-icon" aria-hidden="true">
+            ✎
+          </span>
+        </div>
+      </div>
+
+      <div className="profile-actions">
+        <button className="profile-save-btn" type="submit">
+          Save Changes
+        </button>
+        <button
+          className="profile-cancel-btn"
+          type="button"
+          onClick={onCancel}
+        >
+          Cancel
+        </button>
+      </div>
+    </form>
   );
 }

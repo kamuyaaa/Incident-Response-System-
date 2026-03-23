@@ -1,56 +1,57 @@
-import PhoneFrame from "../../../shared/components/PhoneFrame";
-import { useNavigate } from "react-router-dom";
-import ProfileAvatar from "../components/ProfileAvatar";
-import ProfileForm from "../components/ProfileForm";
-import "../pages/Profile";
-
-export default function Profile() {
-  const navigate = useNavigate();
-
-  const user = {
-    fullname: "John Doe",
-    email: "johndoe@gmail.com",
-    phone: "+254 736 190 7387",
-    password: "**********",
-    profilePhoto: "",
+import { useRef } from "react";
+import "./ProfileAvatar.css";
+export default function ProfileAvatar({ profilePhoto, onPhotoChange }) {
+  const fileInputRef = useRef(null);
+    const handlePickImage = () => {
+    fileInputRef.current?.click();
   };
-
-  const handleSave = (formData) => {
-    console.log("Saving profile:", formData);
-    alert("Profile saved successfully");
-    navigate(-1);
-  };
-
-  const handleCancel = () => {
-    navigate(-1);
-  };
-
-  const handlePhotoChange = (file) => {
-    console.log("Selected photo:", file);
+    const handleFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file && onPhotoChange) {
+      onPhotoChange(file);
+    }
   };
 
   return (
-    <PhoneFrame>
-      <div className="profile-page">
-        <button
-          className="profile-back-btn"
-          onClick={() => navigate(-1)}
-          aria-label="Go back"
-        >
-          ←
-        </button>
-
-        <ProfileAvatar
-          profilePhoto={user.profilePhoto}
-          onPhotoChange={handlePhotoChange}
-        />
-
-        <ProfileForm
-          initialData={user}
-          onSave={handleSave}
-          onCancel={handleCancel}
-        />
+     <div className="profile-avatar-section">
+      <div
+        className="profile-avatar-wrap"
+        onClick={handlePickImage}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            handlePickImage();
+          }
+        }}
+      >
+        {profilePhoto ? (
+          <img
+            src={profilePhoto}
+            alt="Profile"
+            className="profile-avatar-image"
+          />
+        ) : (
+          <div className="profile-avatar-placeholder">📷</div>
+        )}
       </div>
-    </PhoneFrame>
+      
+      <button
+        type="button"
+        className="change-photo-btn"
+        onClick={handlePickImage}
+      >
+        Change Profile Photo
+      </button>
+
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden-file-input"
+        onChange={handleFileChange}
+      />
+    </div>
   );
-}
+  }
