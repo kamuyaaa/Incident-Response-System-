@@ -1,113 +1,94 @@
 import PhoneFrame from "../../../shared/components/PhoneFrame";
 import "./IncidentUpdates.css";
 import { useNavigate } from "react-router-dom";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import ReporterMenu from "../../reporter/components/ReporterMenu";
+import { useAuth } from "../../../shared/hooks/useAuth";
+import responderService from "../services/responderService";
 
-const assignedData = [
-  {
-    id: "#50003",
-    type: "Fire & Rescue",
-    icon: "🔥",
-    date: "09/02/2026",
-    description:
-      "There is a fire in a residential building in Eastleigh, Nairobi. Smoke is coming from the upper floors, and several people are standing outside. I’m not sure if everyone has gotten out yet. I can see about three people injured so far",
-    location: "Eastleigh, Nairobi",
-    status: "Completed",
-  },
-  {
-    id: "#50002",
-    type: "Fire & Rescue",
-    icon: "🔥",
-    date: "20/01/2026",
-    description:
-      "A residential house caught fire late at night, trapping occupants before neighbors helped rescue them as emergency services were contacted",
-    location: "Manyatta Estate, near Manyatta Roundabout, Kisumu",
-    status: "Completed",
-  },
-  {
-    id: "#50001",
-    type: "Fire & Rescue",
-    icon: "🔥",
-    date: "04/09/2025",
-    description:
-      "A fire broke out in several stalls within Gikomba Market, suspected to have been caused by an electrical fault, and spread rapidly before firefighters arrived",
-    location: "Gikomba Market, near Pumwani Road, Nairobi",
-    status: "Completed",
-  },
-  {
-    id: "#50000",
-    type: "Medical Emergency",
-    icon: "🚨",
-    date: "11/08/2025",
-    description:
-      "An elderly man collapsed near the matatu stage and was unable to respond before medical help arrived.",
-    location: "Nyamakima, Nairobi",
-    status: "In Progress",
-  },
-];
+const typeIcons = {
+  "Medical Emergency": "🚨",
+  "Fire & Rescue": "🔥",
+  "Crime & Safety": "🛡️",
+  "Road & Transport": "🚗",
+  "Public Safety & Welfare": "👥",
+  "Natural Disaster": "🌊",
+};
 
-const inProgressData = [
-  {
-    id: "#41001",
-    type: "Road & Transport",
-    icon: "🚗",
-    date: "14/02/2026",
-    description:
-      "Two vehicles collided at a junction, causing heavy traffic and minor injuries.",
-    location: "Thika Road, Nairobi",
-    status: "In Progress",
-  },
-];
-
-const completedData = [
-  {
-    id: "#32001",
-    type: "Crime & Safety",
-    icon: "🛡️",
-    date: "10/02/2026",
-    description:
-      "A robbery incident was reported and the suspect was later apprehended by officers.",
-    location: "CBD, Nairobi",
-    status: "Completed",
-  },
-  {
-    id: "#32002",
-    type: "Public Safety & Welfare",
-    icon: "👥",
-    date: "08/02/2026",
-    description:
-      "A lost child was safely reunited with their family after being found in a crowded public area.",
-    location: "Busia Town",
-    status: "Completed",
-  },
-];
-
-export default function MyAssignments() {
+export default function IncidentUpdates() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+
+  const [assignments, setAssignments] = useState([]);
   const [activeTab, setActiveTab] = useState("assigned");
   const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(true);
 
   const itemsPerPage = 3;
 
-  const allReports =
-    activeTab === "assigned"
-      ? assignedData
-      : activeTab === "progress"
-      ? inProgressData
-      : completedData;
+  useEffect(() => {
+    async function loadAssignments() {
+      try {
+        const data = await responderService.getAssignments(user.id);
+        setAssignments(data);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    }
 
-  const totalPages = Math.max(1, Math.ceil(allReports.length / itemsPerPage));
+    if (user?.id) {
+      loadAssignments();
+    }
+  }, [user]);
+
+  const filteredAssignments = useMemo(() => {
+    if (activeTab === "assigned") {
+      return assignments.filter(
+        (incident) => incident.status === "Assigned" || incident.status === "Unassigned"
+      );
+    }
+
+    if (activeTab === "progress") {
+      return assignments.filter((incident) => incident.status === "In Progress");
+    }
+
+    return assignments.filter((incident) => incident.status === "Completed");
+  }, [assignments, activeTab]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredAssignments.length / itemsPerPage));
 
   const currentReports = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
-    return allReports.slice(startIndex, startIndex + itemsPerPage);
-  }, [allReports, currentPage]);
+    return filteredAssignments.slice(startIndex, startIndex + itemsPerPage);
+  }, [filteredAssignments, currentPage]);
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
     setCurrentPage(1);
   };
+
+  const handleStatusUpdate = async (incidentId, nextStatus) => {
+    try {
+      const response = await responderService.updateIncidentStatus(
+        incidentId,
+        nextStatus
+      );
+
+      setAssignments((prev) =>
+        prev.map((incident) =>
+          incident.id === incidentId ? response.incident : incident
+        )
+      );
+    } catch (error) {
+      alert(error.message);
+    }
+  };
+
+  if (loading) {
+    return <PhoneFrame><div className="assignments-page">Loading incidents...</div></PhoneFrame>;
+  }
 
   return (
     <PhoneFrame>
@@ -126,27 +107,21 @@ export default function MyAssignments() {
 
         <div className="assignments-tabs">
           <button
-            className={`assignments-tab ${
-              activeTab === "assigned" ? "active" : ""
-            }`}
+            className={`assignments-tab ${activeTab === "assigned" ? "active" : ""}`}
             onClick={() => handleTabChange("assigned")}
           >
             Assigned Incidents
           </button>
 
           <button
-            className={`assignments-tab ${
-              activeTab === "progress" ? "active" : ""
-            }`}
+            className={`assignments-tab ${activeTab === "progress" ? "active" : ""}`}
             onClick={() => handleTabChange("progress")}
           >
             In Progress
           </button>
 
           <button
-            className={`assignments-tab ${
-              activeTab === "completed" ? "active" : ""
-            }`}
+            className={`assignments-tab ${activeTab === "completed" ? "active" : ""}`}
             onClick={() => handleTabChange("completed")}
           >
             Completed
@@ -158,12 +133,14 @@ export default function MyAssignments() {
             <article key={report.id} className="assignment-card">
               <div className="assignment-card-top">
                 <div className="assignment-type-wrap">
-                  <span className="assignment-type-icon">{report.icon}</span>
+                  <span className="assignment-type-icon">
+                    {typeIcons[report.type] || "📝"}
+                  </span>
                   <span className="assignment-type-text">{report.type}</span>
                 </div>
 
                 <span className="assignment-date">
-                  Reported: {report.date}
+                  Reported: {new Date(report.createdAt).toLocaleDateString()}
                 </span>
               </div>
 
@@ -177,13 +154,28 @@ export default function MyAssignments() {
               <div className="assignment-status-row">
                 <span
                   className={`assignment-status ${
-                    report.status === "Completed"
-                      ? "completed"
-                      : "in-progress"
+                    report.status === "Completed" ? "completed" : "in-progress"
                   }`}
                 >
                   {report.status}
                 </span>
+              </div>
+
+              <div className="incident-actions">
+                {report.status !== "In Progress" && (
+                  <button onClick={() => handleStatusUpdate(report.id, "In Progress")}>
+                    Mark In Progress
+                  </button>
+                )}
+
+                {report.status !== "Completed" && (
+                  <button
+                    className="secondary-btn"
+                    onClick={() => handleStatusUpdate(report.id, "Completed")}
+                  >
+                    Mark Completed
+                  </button>
+                )}
               </div>
             </article>
           ))}

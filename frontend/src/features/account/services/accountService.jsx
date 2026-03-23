@@ -1,17 +1,12 @@
+import apiClient from "../../../shared/services/apiClient";
+
 const accountService = {
-  async getProfile() {
-    return {
-      fullname: "John Doe",
-      email: "johndoe@gmail.com",
-      phone: "+254 736 190 7387",
-      password: "**********",
-      profilePhoto: "",
-    };
+  async getProfile(userId) {
+    return apiClient.get(`/account/profile/${userId}`);
   },
 
-  async updateProfile(profileData) {
-    console.log("Updating profile in backend later:", profileData);
-    return { success: true, data: profileData };
+  async updateProfile(userId, profileData) {
+    return apiClient.patch(`/account/profile/${userId}`, profileData);
   },
 };
 

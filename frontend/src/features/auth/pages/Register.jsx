@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useAuth } from "../../../shared/hooks/useAuth";
 import logo from "../../../assets/logo.png";
+import authService from "../services/authService";
 
 export default function Register() {
   const navigate = useNavigate();
@@ -17,6 +18,9 @@ export default function Register() {
     role: "reporter",
   });
 
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+
   const handleChange = (e) => {
     const { id, value } = e.target;
 
@@ -26,18 +30,21 @@ export default function Register() {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitting(true);
+    setError("");
 
-    login({
-      id: "1",
-      name: form.fullname,
-      email: form.email,
-      phone: form.phone,
-      role: form.role,
-    });
+    try {
+      const response = await authService.register(form);
 
-    navigate(`/${form.role}`);
+      login(response.user, "");
+      navigate(`/${response.user.role}`);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -47,6 +54,8 @@ export default function Register() {
           <img src={logo} alt="SafeReport logo" className="register-logo" />
 
           <h1 className="register-title">Create Account</h1>
+
+          {error && <p className="form-error">{error}</p>}
 
           <form onSubmit={handleSubmit}>
             <div className="register-field">
@@ -111,8 +120,8 @@ export default function Register() {
               </select>
             </div>
 
-            <button className="register-btn" type="submit">
-              REGISTER
+            <button className="register-btn" type="submit" disabled={submitting}>
+              {submitting ? "REGISTERING..." : "REGISTER"}
             </button>
           </form>
 

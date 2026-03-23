@@ -3,18 +3,52 @@ import "./ReportDetails.css";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useState } from "react";
 import ReporterMenu from "../components/ReporterMenu";
+import { useAuth } from "../../../shared/hooks/useAuth";
+import reporterService from "../services/reporterService";
 
 export default function ReportDetails() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { user } = useAuth();
+
   const [showConfirm, setShowConfirm] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [form, setForm] = useState({
+    description: "",
+    casualties: "",
+    location: "",
+  });
 
   const type = searchParams.get("type") || "general";
 
-  const handleFinalSubmit = () => {
-    setShowConfirm(false);
-    alert("Report submitted successfully");
-    navigate("/reporter/my-reports");
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    setForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleFinalSubmit = async () => {
+    setSubmitting(true);
+
+    try {
+      await reporterService.createIncident({
+        reporterId: user.id,
+        type,
+        description: form.description,
+        location: form.location,
+      });
+
+      setShowConfirm(false);
+      alert("Report submitted successfully");
+      navigate("/reporter/my-reports");
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -47,16 +81,32 @@ export default function ReportDetails() {
           >
             <label>Description</label>
             <textarea
+              name="description"
               placeholder="Describe what happened..."
               rows="5"
+              value={form.description}
+              onChange={handleChange}
               required
             />
 
             <label>Any casualties? If yes, how many?</label>
-            <input type="text" placeholder="Yes, 1 person" />
+            <input
+              name="casualties"
+              type="text"
+              placeholder="Yes, 1 person"
+              value={form.casualties}
+              onChange={handleChange}
+            />
 
             <label>Location</label>
-            <input type="text" placeholder="TRM, Thika Road" required />
+            <input
+              name="location"
+              type="text"
+              placeholder="TRM, Thika Road"
+              value={form.location}
+              onChange={handleChange}
+              required
+            />
 
             <label>
               Upload Pictures / Videos <span>(optional)</span>
@@ -85,13 +135,15 @@ export default function ReportDetails() {
               <button
                 className="confirm-yes-btn"
                 onClick={handleFinalSubmit}
+                disabled={submitting}
               >
-                YES
+                {submitting ? "SUBMITTING..." : "YES"}
               </button>
 
               <button
                 className="confirm-cancel-btn"
                 onClick={() => setShowConfirm(false)}
+                disabled={submitting}
               >
                 CANCEL
               </button>

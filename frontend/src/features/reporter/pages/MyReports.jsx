@@ -1,129 +1,76 @@
 import PhoneFrame from "../../../shared/components/PhoneFrame";
 import "./MyReports.css";
-import { useNavigate } from "react-router-dom";
-import { useMemo, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
 import ReporterMenu from "../components/ReporterMenu";
-import { useSearchParams } from "react-router-dom";
+import reporterService from "../services/reporterService";
+import { useAuth } from "../../../shared/hooks/useAuth";
 
-const myReportsData = [
-  {
-    id: "#10003",
-    type: "Medical Emergency",
-    icon: "🚨",
-    date: "13/02/2026",
-    description:
-      "A person has collapsed near the entrance of TRM and is not responding. A small crowd has gathered, and we need medical assistance urgently.",
-    location: "TRM, Thika Road",
-    status: "In Progress",
-  },
-  {
-    id: "#50003",
-    type: "Fire & Rescue",
-    icon: "🔥",
-    date: "09/02/2026",
-    description:
-      "There is a fire in a residential building in Eastleigh, Nairobi. Smoke is coming from the upper floors, and several people are standing outside.",
-    location: "Eastleigh, Nairobi",
-    status: "Completed",
-  },
-  {
-    id: "#20003",
-    type: "Crime & Safety",
-    icon: "🛡️",
-    date: "26/01/2026",
-    description:
-      "A shop in Eldoret town center has just been robbed. The suspect ran away a few minutes ago, and the owner is shaken.",
-    location: "Eldoret town center, Eldoret",
-    status: "In Progress",
-  },
-  {
-    id: "#31004",
-    type: "Road & Transport",
-    icon: "🚗",
-    date: "20/01/2026",
-    description:
-      "A matatu and a private car have collided near the roundabout, causing traffic congestion.",
-    location: "Thika Superhighway",
-    status: "Completed",
-  },
-  {
-    id: "#45001",
-    type: "Public Safety & Welfare",
-    icon: "👥",
-    date: "18/01/2026",
-    description:
-      "A child appears lost at the market area and several people are trying to help.",
-    location: "Gikomba Market",
-    status: "In Progress",
-  },
-  {
-    id: "#60021",
-    type: "Natural Disaster",
-    icon: "🌊",
-    date: "12/01/2026",
-    description:
-      "Flood waters are rising quickly in the lower residential area and families are evacuating.",
-    location: "Budalang’i",
-    status: "In Progress",
-  },
-];
+const typeIcons = {
+  "Medical Emergency": "🚨",
+  "Fire & Rescue": "🔥",
+  "Crime & Safety": "🛡️",
+  "Road & Transport": "🚗",
+  "Public Safety & Welfare": "👥",
+  "Natural Disaster": "🌊",
+};
 
-const otherReportsData = [
-  {
-    id: "#34001",
-    type: "Road & Transport",
-    icon: "🚗",
-    date: "12/02/2026",
-    description:
-      "Two vehicles have collided near the roundabout and traffic is building up quickly.",
-    location: "Muthaiga roundabout, Nairobi",
-    status: "In Progress",
-  },
-  {
-    id: "#34002",
-    type: "Public Safety & Welfare",
-    icon: "👥",
-    date: "10/02/2026",
-    description:
-      "There is a large unattended crowd gathering near the bus stage and people seem distressed.",
-    location: "Kencom stage, Nairobi",
-    status: "Completed",
-  },
-  {
-    id: "#34003",
-    type: "Crime & Safety",
-    icon: "🛡️",
-    date: "09/02/2026",
-    description:
-      "A suspicious group has been reported near a closed shop late at night.",
-    location: "Ngara, Nairobi",
-    status: "In Progress",
-  },
-  {
-    id: "#34004",
-    type: "Medical Emergency",
-    icon: "🚨",
-    date: "05/02/2026",
-    description:
-      "An elderly man collapsed at a bus stop and nearby people called for assistance.",
-    location: "Khoja, Nairobi",
-    status: "Completed",
-  },
-];
+function mapIncidentToReport(incident) {
+  return {
+    id: incident.id,
+    type: incident.type,
+    icon: typeIcons[incident.type] || "📝",
+    date: new Date(incident.createdAt).toLocaleDateString(),
+    description: incident.description,
+    location: incident.location,
+    status: incident.status,
+    reporterId: incident.reporterId,
+  };
+}
 
 export default function MyReports() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { user } = useAuth();
+
   const defaultTab = searchParams.get("tab") || "mine";
 
   const [activeTab, setActiveTab] = useState(defaultTab);
   const [currentPage, setCurrentPage] = useState(1);
+  const [myReports, setMyReports] = useState([]);
+  const [otherReports, setOtherReports] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const reportsPerPage = 3;
 
-  const allReports = activeTab === "mine" ? myReportsData : otherReportsData;
+  useEffect(() => {
+    async function loadReports() {
+      try {
+        const [mine, all] = await Promise.all([
+          reporterService.getMyReports(user.id),
+          reporterService.getAllIncidents(),
+        ]);
 
-  const totalPages = Math.ceil(allReports.length / reportsPerPage);
+        setMyReports(mine.map(mapIncidentToReport));
+        setOtherReports(
+          all
+            .filter((incident) => incident.reporterId !== user.id)
+            .map(mapIncidentToReport)
+        );
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    if (user?.id) {
+      loadReports();
+    }
+  }, [user]);
+
+  const allReports = activeTab === "mine" ? myReports : otherReports;
+  const totalPages = Math.max(1, Math.ceil(allReports.length / reportsPerPage));
 
   const currentReports = useMemo(() => {
     const startIndex = (currentPage - 1) * reportsPerPage;
@@ -147,6 +94,14 @@ export default function MyReports() {
       setCurrentPage((prev) => prev - 1);
     }
   };
+
+  if (loading) {
+    return (
+      <PhoneFrame>
+        <div className="myreports-page">Loading reports...</div>
+      </PhoneFrame>
+    );
+  }
 
   return (
     <PhoneFrame>
@@ -234,7 +189,7 @@ export default function MyReports() {
           <button
             className="page-arrow"
             onClick={handleNextPage}
-            disabled={currentPage === totalPages || totalPages === 0}
+            disabled={currentPage === totalPages}
             aria-label="Next page"
           >
             {">"}

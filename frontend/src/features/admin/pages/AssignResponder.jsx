@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   MapContainer,
   Marker,
@@ -9,6 +9,7 @@ import {
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "./AssignResponder.css";
+import adminService from "../services/adminService";
 
 // Fix default Leaflet marker icons in Vite/React
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
@@ -22,71 +23,64 @@ L.Icon.Default.mergeOptions({
   shadowUrl: markerShadow,
 });
 
-const incidents = [
-  {
-    id: "INC-1001",
-    type: "Medical Emergency",
-    location: "TRM Mall, Nairobi",
-    priority: "High",
-    coords: [-1.2186, 36.8856],
-  },
-  {
-    id: "INC-1002",
-    type: "Fire & Rescue",
-    location: "Eastleigh, Nairobi",
-    priority: "Critical",
-    coords: [-1.2756, 36.8523],
-  },
-];
-
-const responders = [
-  {
-    id: "R-01",
-    name: "Jack Doe",
-    unit: "Ambulance 2",
-    status: "Available",
-    location: "TRM Area",
-    coords: [-1.2202, 36.8817],
-  },
-  {
-    id: "R-02",
-    name: "Mary Wanjiru",
-    unit: "Fire Unit 1",
-    status: "Available",
-    location: "Eastleigh",
-    coords: [-1.2734, 36.8571],
-  },
-  {
-    id: "R-03",
-    name: "Kevin Otieno",
-    unit: "Traffic Unit 4",
-    status: "Dispatched",
-    location: "CBD",
-    coords: [-1.2867, 36.8172],
-  },
-];
-
 export default function AssignResponder() {
+  const [incidents, setIncidents] = useState([]);
+  const [responders, setResponders] = useState([]);
   const [selectedIncident, setSelectedIncident] = useState(null);
   const [selectedResponderId, setSelectedResponderId] = useState("");
+  const [loading, setLoading] = useState(true);
 
   const selectedResponder = useMemo(
     () => responders.find((r) => r.id === selectedResponderId) || null,
-    [selectedResponderId]
+    [responders, selectedResponderId]
   );
 
-  const center = [-1.2864, 36.8172]; // Nairobi
+  const center = [-1.2864, 36.8172];
 
-  const handleAssign = () => {
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const [incidentData, responderData] = await Promise.all([
+          adminService.getIncidentsQueue("?status=Unassigned"),
+          adminService.getResponders(),
+        ]);
+
+        setIncidents(incidentData);
+        setResponders(responderData);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadData();
+  }, []);
+
+  const handleAssign = async () => {
     if (!selectedIncident || !selectedResponder) return;
 
-    alert(
-      `${selectedResponder.name} assigned to ${selectedIncident.type} at ${selectedIncident.location}`
-    );
+    try {
+      await adminService.assignResponder(selectedIncident.id, selectedResponder.id);
 
-    setSelectedIncident(null);
-    setSelectedResponderId("");
+      setIncidents((prev) =>
+        prev.filter((incident) => incident.id !== selectedIncident.id)
+      );
+
+      alert(
+        `${selectedResponder.name} assigned to ${selectedIncident.type} at ${selectedIncident.location}`
+      );
+
+      setSelectedIncident(null);
+      setSelectedResponderId("");
+    } catch (error) {
+      alert(error.message);
+    }
   };
+
+  if (loading) {
+    return <div className="assign-page">Loading assignment data...</div>;
+  }
 
   return (
     <div className="assign-page">
@@ -142,14 +136,12 @@ export default function AssignResponder() {
                   {responder.status}
                 </span>
 
-                {responder.status === "Available" && (
-                  <button
-                    onClick={() => setSelectedResponderId(responder.id)}
-                    className="select-btn"
-                  >
-                    Select
-                  </button>
-                )}
+                <button
+                  onClick={() => setSelectedResponderId(responder.id)}
+                  className="select-btn"
+                >
+                  Select
+                </button>
               </div>
             ))}
           </div>
@@ -166,12 +158,15 @@ export default function AssignResponder() {
               className="real-map"
             >
               <TileLayer
-                attribution='&copy; OpenStreetMap contributors'
+                attribution="&copy; OpenStreetMap contributors"
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               />
 
-              {incidents.map((incident) => (
-                <Marker key={incident.id} position={incident.coords}>
+              {incidents.map((incident, index) => (
+                <Marker
+                  key={incident.id}
+                  position={incident.coords || [center[0] + index * 0.01, center[1] + index * 0.01]}
+                >
                   <Popup>
                     <strong>{incident.type}</strong>
                     <br />
@@ -182,8 +177,11 @@ export default function AssignResponder() {
                 </Marker>
               ))}
 
-              {responders.map((responder) => (
-                <Marker key={responder.id} position={responder.coords}>
+              {responders.map((responder, index) => (
+                <Marker
+                  key={responder.id}
+                  position={responder.coords || [center[0] - index * 0.01, center[1] - index * 0.01]}
+                >
                   <Popup>
                     <strong>{responder.name}</strong>
                     <br />
@@ -194,10 +192,8 @@ export default function AssignResponder() {
                 </Marker>
               ))}
 
-              {selectedIncident && selectedResponder && (
-                <Polyline
-                  positions={[selectedResponder.coords, selectedIncident.coords]}
-                />
+              {selectedIncident && selectedResponder && selectedIncident.coords && selectedResponder.coords && (
+                <Polyline positions={[selectedResponder.coords, selectedIncident.coords]} />
               )}
             </MapContainer>
           </div>

@@ -1,24 +1,45 @@
 import PhoneFrame from "../../../shared/components/PhoneFrame";
 import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import ProfileAvatar from "../components/ProfileAvatar";
 import ProfileForm from "../components/ProfileForm";
 import "./Profile.css";
+import accountService from "../services/accountService";
+import { useAuth } from "../../../shared/hooks/useAuth";
 
 export default function Profile() {
   const navigate = useNavigate();
+  const { user } = useAuth();
 
-  const user = {
-    fullname: "John Doe",
-    email: "johndoe@gmail.com",
-    phone: "+254 736 190 7387",
-    password: "**********",
-    profilePhoto: "",
-  };
+  const [profile, setProfile] = useState(null);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
 
-  const handleSave = (formData) => {
-    console.log("Saving profile:", formData);
-    alert("Profile saved successfully");
-    navigate(-1);
+  useEffect(() => {
+    async function loadProfile() {
+      try {
+        const data = await accountService.getProfile(user.id);
+        setProfile(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    if (user?.id) {
+      loadProfile();
+    }
+  }, [user]);
+
+  const handleSave = async (formData) => {
+    try {
+      await accountService.updateProfile(user.id, formData);
+      alert("Profile saved successfully");
+      navigate(-1);
+    } catch (err) {
+      alert(err.message);
+    }
   };
 
   const handleCancel = () => {
@@ -28,6 +49,22 @@ export default function Profile() {
   const handlePhotoChange = (file) => {
     console.log("Selected photo:", file);
   };
+
+  if (loading) {
+    return (
+      <PhoneFrame>
+        <div className="profile-page">Loading profile...</div>
+      </PhoneFrame>
+    );
+  }
+
+  if (error) {
+    return (
+      <PhoneFrame>
+        <div className="profile-page">{error}</div>
+      </PhoneFrame>
+    );
+  }
 
   return (
     <PhoneFrame>
@@ -41,12 +78,12 @@ export default function Profile() {
         </button>
 
         <ProfileAvatar
-          profilePhoto={user.profilePhoto}
+          profilePhoto={profile?.profilePhoto}
           onPhotoChange={handlePhotoChange}
         />
 
         <ProfileForm
-          initialData={user}
+          initialData={profile}
           onSave={handleSave}
           onCancel={handleCancel}
         />
