@@ -10,7 +10,7 @@
 
 .login-card {
   width: 100%;
-  max-width: 290px;
+  max-width: 320px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -18,23 +18,27 @@
 }
 
 .login-logo {
-  width: 95px;
-  height: 95px;
+  width: 90px;
+  height: 90px;
   object-fit: contain;
-  margin-bottom: 18px;
+  margin-bottom: 14px;
 }
 
 .login-title {
-  font-size: 2rem;
+  font-size: 1.8rem;
   font-weight: 700;
   color: #111;
-  margin-bottom: 28px;
+  margin-bottom: 24px;
   text-align: center;
+}
+
+.login-card form {
+  width: 100%;
 }
 
 .login-field {
   width: 100%;
-  margin-bottom: 18px;
+  margin-bottom: 14px;
 }
 
 .login-field label {
@@ -46,11 +50,11 @@
 
 .login-field input {
   width: 100%;
-  height: 44px;
+  height: 42px;
   border: 1px solid #8e8e8e;
   border-radius: 999px;
   padding: 0 16px;
-  font-size: 1rem;
+  font-size: 0.96rem;
   background: transparent;
   outline: none;
   box-sizing: border-box;
@@ -62,12 +66,13 @@
 
 .login-field select {
   width: 100%;
-  padding: 14px 16px;
+  height: 42px;
+  padding: 0px 16px;
   border-radius: 12px;
   border: 1px solid #dcdcdc;
-  font-size: 14px;
+  font-size: 0.96rem;
   outline: none;
-  background: #fff;
+  background: transparent;
 }
 
 .login-options {
@@ -75,7 +80,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin: 4px 0 24px;
+  margin: 4px 0 20px;
   gap: 12px;
 }
 
@@ -83,7 +88,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 0.92rem;
+  font-size: 0.9rem;
   color: #222;
   cursor: pointer;
 }
@@ -93,28 +98,28 @@
 }
 
 .forgot-password {
-  font-size: 0.92rem;
+  font-size: 0.9rem;
   color: #e01919;
   cursor: pointer;
   margin: 0;
 }
 
 .login-btn {
-  width: 145px;
-  height: 42px;
+  width: 100%;
+  min-height: 44px;
   border: none;
   border-radius: 999px;
   background: #df161c;
   color: #fff;
-  font-size: 1.05rem;
+  font-size: 0.98rem;
   font-weight: 700;
   cursor: pointer;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
 }
 
 .register-text {
-  font-size: 0.95rem;
+  font-size: 0.92rem;
   color: #222;
   text-align: center;
   margin: 0;

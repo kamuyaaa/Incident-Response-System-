@@ -165,7 +165,7 @@ export default function AssignResponder() {
               {incidents.map((incident, index) => (
                 <Marker
                   key={incident.id}
-                  position={incident.coords || [center[0] + index * 0.01, center[1] + index * 0.01]}
+                  position={incident.coords || (incident.latitude != null && incident.longitude != null ? [incident.latitude, incident.longitude] : [center[0] + index * 0.01, center[1] + index * 0.01])}
                 >
                   <Popup>
                     <strong>{incident.type}</strong>
@@ -192,8 +192,8 @@ export default function AssignResponder() {
                 </Marker>
               ))}
 
-              {selectedIncident && selectedResponder && selectedIncident.coords && selectedResponder.coords && (
-                <Polyline positions={[selectedResponder.coords, selectedIncident.coords]} />
+              {selectedIncident && selectedResponder && (selectedIncident.coords || (selectedIncident.latitude != null && selectedIncident.longitude != null)) && selectedResponder.coords && (
+                <Polyline positions={[selectedResponder.coords, selectedIncident.coords || [selectedIncident.latitude, selectedIncident.longitude]]} />
               )}
             </MapContainer>
           </div>

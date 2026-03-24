@@ -7,13 +7,61 @@ import "./Profile.css";
 import accountService from "../services/accountService";
 import { useAuth } from "../../../shared/hooks/useAuth";
 
+function ProfileContent({ profile, onBack, onSave, onCancel, onPhotoChange, isAdmin }) {
+  return (
+    <div className={`profile-page ${isAdmin ? "admin-profile-page" : "mobile-profile-page"}`}>
+      <div className="profile-header-row">
+        <button
+          className="profile-back-btn"
+          onClick={onBack}
+          aria-label="Go back"
+        >
+          ←
+        </button>
+
+        <div className="profile-header-copy">
+          <p className="profile-eyebrow">Account settings</p>
+          <h1>{isAdmin ? "Admin Profile" : "My Profile"}</h1>
+          <p>
+            {isAdmin
+              ? "Manage administrator details from a desktop-friendly workspace."
+              : "Keep your personal details up to date for faster emergency follow-up."}
+          </p>
+        </div>
+      </div>
+
+      <div className={`profile-content-shell ${isAdmin ? "admin-profile-shell" : "mobile-profile-shell"}`}>
+        <div className="profile-avatar-card">
+          <ProfileAvatar
+            profilePhoto={profile?.profilePhoto}
+            onPhotoChange={onPhotoChange}
+          />
+        </div>
+
+        <div className="profile-form-card">
+          <ProfileForm
+            initialData={profile}
+            onSave={onSave}
+            onCancel={onCancel}
+            isAdmin={isAdmin}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function Profile() {
   const navigate = useNavigate();
   const { user } = useAuth();
 
   const [profile, setProfile] = useState(null);
+  const [selectedPhoto, setSelectedPhoto] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+
+  const isAdmin = user?.role === "admin";
+
 
   useEffect(() => {
     async function loadProfile() {
@@ -34,7 +82,10 @@ export default function Profile() {
 
   const handleSave = async (formData) => {
     try {
-      await accountService.updateProfile(user.id, formData);
+      await accountService.updateProfile(user.id, {
+        ...formData,
+        profilePhoto: selectedPhoto || profile?.profilePhoto || "",
+      });
       alert("Profile saved successfully");
       navigate(-1);
     } catch (err) {
@@ -47,47 +98,32 @@ export default function Profile() {
   };
 
   const handlePhotoChange = (file) => {
-    console.log("Selected photo:", file);
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setSelectedPhoto(reader.result?.toString() || "");
+    };
+    reader.readAsDataURL(file);
   };
 
   if (loading) {
-    return (
-      <PhoneFrame>
-        <div className="profile-page">Loading profile...</div>
-      </PhoneFrame>
-    );
+    const loadingContent = <div className="profile-status-message">Loading profile...</div>;
+    return isAdmin ? loadingContent : <PhoneFrame>{loadingContent}</PhoneFrame>;
   }
 
   if (error) {
-    return (
-      <PhoneFrame>
-        <div className="profile-page">{error}</div>
-      </PhoneFrame>
-    );
+    const errorContent = <div className="profile-status-message">{error}</div>;
+    return isAdmin ? errorContent : <PhoneFrame>{errorContent}</PhoneFrame>;
   }
-
-  return (
-    <PhoneFrame>
-      <div className="profile-page">
-        <button
-          className="profile-back-btn"
-          onClick={() => navigate(-1)}
-          aria-label="Go back"
-        >
-          ←
-        </button>
-
-        <ProfileAvatar
-          profilePhoto={profile?.profilePhoto}
-          onPhotoChange={handlePhotoChange}
-        />
-
-        <ProfileForm
-          initialData={profile}
-          onSave={handleSave}
-          onCancel={handleCancel}
-        />
-      </div>
-    </PhoneFrame>
+ const content = (
+    <ProfileContent
+      profile={profile}
+      profilePhoto={selectedPhoto || profile?.profilePhoto}
+      onBack={() => navigate(-1)}
+      onSave={handleSave}
+      onCancel={handleCancel}
+      onPhotoChange={handlePhotoChange}
+      isAdmin={isAdmin}
+    />
   );
+  return isAdmin ? content : <PhoneFrame>{content}</PhoneFrame>;
 }

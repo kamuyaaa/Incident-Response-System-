@@ -113,12 +113,9 @@ export default function Login() {
                 <span>Remember me</span>
               </label>
 
-              <p
-                className="forgot-password"
-                onClick={() => navigate("/forgot-password")}
-              >
+              <Link className="forgot-password" to="/forgot-password">
                 Forgot Password?
-              </p>
+              </Link>
             </div>
 
             <button className="login-btn" type="submit" disabled={submitting}>

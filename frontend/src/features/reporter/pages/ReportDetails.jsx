@@ -1,10 +1,40 @@
 import PhoneFrame from "../../../shared/components/PhoneFrame";
 import "./ReportDetails.css";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { MapContainer, Marker, TileLayer, useMapEvents } from "react-leaflet";
+import L from "leaflet";
 import ReporterMenu from "../components/ReporterMenu";
 import { useAuth } from "../../../shared/hooks/useAuth";
 import reporterService from "../services/reporterService";
+
+import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
+import markerIcon from "leaflet/dist/images/marker-icon.png";
+import markerShadow from "leaflet/dist/images/marker-shadow.png";
+
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: markerIcon2x,
+  iconUrl: markerIcon,
+  shadowUrl: markerShadow,
+});
+
+const DEFAULT_CENTER = [-1.2864, 36.8172];
+
+function MapClickHandler({ onSelect }) {
+  useMapEvents({
+    click(event) {
+      const { lat, lng } = event.latlng;
+      onSelect(lat, lng);
+    },
+  });
+
+  return null;
+}
+
+function formatCoordinates(lat, lng) {
+  return `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+}
 
 export default function ReportDetails() {
   const navigate = useNavigate();
@@ -13,13 +43,114 @@ export default function ReportDetails() {
 
   const [showConfirm, setShowConfirm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [locationSuggestions, setLocationSuggestions] = useState([]);
+  const [loadingLocations, setLoadingLocations] = useState(false);
+  const [locationError, setLocationError] = useState("");
+  const [locationStatus, setLocationStatus] = useState("");
+  const [selectedSuggestion, setSelectedSuggestion] = useState(null);
+
   const [form, setForm] = useState({
     description: "",
     casualties: "",
     location: "",
+    latitude: DEFAULT_CENTER[0],
+    longitude: DEFAULT_CENTER[1],
   });
 
   const type = searchParams.get("type") || "general";
+
+  const selectedPosition = useMemo(
+    () => [form.latitude, form.longitude],
+    [form.latitude, form.longitude]
+  );
+
+  useEffect(() => {
+    if (!navigator.geolocation) {
+      setLocationStatus(
+        "Live location is unavailable in this browser. Search and pick a Kenya location."
+      );
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      ({ coords }) => {
+        const isLikelyInKenya =
+          coords.latitude >= -5 &&
+          coords.latitude <= 6 &&
+          coords.longitude >= 33 &&
+          coords.longitude <= 42;
+
+        if (isLikelyInKenya) {
+          setForm((prev) => ({
+            ...prev,
+            latitude: coords.latitude,
+            longitude: coords.longitude,
+          }));
+          setLocationStatus(
+            "Current location loaded. Search and select the exact Kenya location to confirm."
+          );
+        } else {
+          setLocationStatus(
+            "Your detected location seems outside Kenya. Please search and pick a Kenya location."
+          );
+        }
+      },
+      () => {
+        setLocationStatus(
+          "Location permission not granted. Search and pick a Kenya location manually."
+        );
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  }, []);
+
+  useEffect(() => {
+    const query = form.location.trim();
+
+    if (query.length < 3 || selectedSuggestion?.display_name === query) {
+      setLocationSuggestions([]);
+      setLoadingLocations(false);
+      return;
+    }
+
+    const controller = new AbortController();
+    const timer = setTimeout(async () => {
+      try {
+        setLoadingLocations(true);
+        const url = new URL("https://nominatim.openstreetmap.org/search");
+        url.searchParams.set("format", "json");
+        url.searchParams.set("limit", "5");
+        url.searchParams.set("addressdetails", "1");
+        url.searchParams.set("countrycodes", "ke");
+        url.searchParams.set("q", query);
+
+        const response = await fetch(url.toString(), {
+          signal: controller.signal,
+          headers: {
+            "Accept-Language": "en",
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error("Unable to load location suggestions");
+        }
+
+        const data = await response.json();
+        setLocationSuggestions(Array.isArray(data) ? data : []);
+      } catch (error) {
+        if (error.name !== "AbortError") {
+          setLocationSuggestions([]);
+        }
+      } finally {
+        setLoadingLocations(false);
+      }
+    }, 350);
+
+    return () => {
+      controller.abort();
+      clearTimeout(timer);
+    };
+  }, [form.location, selectedSuggestion]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -28,6 +159,83 @@ export default function ReportDetails() {
       ...prev,
       [name]: value,
     }));
+
+    if (name === "location") {
+      setLocationError("");
+      setSelectedSuggestion(null);
+    }
+  };
+
+  const handleMapSelect = async (lat, lng) => {
+    setForm((prev) => ({
+      ...prev,
+      latitude: lat,
+      longitude: lng,
+    }));
+
+    try {
+      const url = new URL("https://nominatim.openstreetmap.org/reverse");
+      url.searchParams.set("format", "json");
+      url.searchParams.set("lat", lat);
+      url.searchParams.set("lon", lng);
+      url.searchParams.set("zoom", "18");
+      url.searchParams.set("addressdetails", "1");
+
+      const response = await fetch(url.toString(), {
+        headers: {
+          "Accept-Language": "en",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Reverse geocoding failed");
+      }
+
+      const data = await response.json();
+      const countryCode = data?.address?.country_code?.toLowerCase();
+
+      if (countryCode !== "ke") {
+        setLocationError("Please pick a location inside Kenya.");
+        setLocationStatus("Pinned point is outside Kenya. Please pick a Kenya location.");
+        setSelectedSuggestion(null);
+        return;
+      }
+
+      const displayName = data?.display_name || `Pinned map location (${formatCoordinates(lat, lng)})`;
+
+      setForm((prev) => ({
+        ...prev,
+        location: displayName,
+      }));
+      setSelectedSuggestion({ display_name: displayName, lat, lon: lng });
+      setLocationError("");
+      setLocationSuggestions([]);
+      setLocationStatus("Location pinned and validated in Kenya.");
+    } catch {
+      setForm((prev) => ({
+        ...prev,
+        location: `Pinned map location (${formatCoordinates(lat, lng)})`,
+      }));
+      setSelectedSuggestion(null);
+      setLocationError("Could not validate map pin. Please search and select a Kenya location from suggestions.");
+      setLocationStatus("Map pin dropped. Please select a Kenya suggestion to confirm location.");
+    }
+  };
+
+  const handleLocationSelect = (suggestion) => {
+    const lat = Number(suggestion.lat);
+    const lng = Number(suggestion.lon);
+
+    setForm((prev) => ({
+      ...prev,
+      location: suggestion.display_name,
+      latitude: lat,
+      longitude: lng,
+    }));
+    setSelectedSuggestion(suggestion);
+    setLocationSuggestions([]);
+    setLocationError("");
+    setLocationStatus("Kenya location selected and pinned on map.");
   };
 
   const handleFinalSubmit = async () => {
@@ -76,6 +284,12 @@ export default function ReportDetails() {
             className="report-details-form"
             onSubmit={(e) => {
               e.preventDefault();
+
+              if (!selectedSuggestion) {
+                setLocationError("Please choose a valid Kenya location from search suggestions or map pin.");
+                return;
+              }
+
               setShowConfirm(true);
             }}
           >
@@ -98,15 +312,71 @@ export default function ReportDetails() {
               onChange={handleChange}
             />
 
-            <label>Location</label>
-            <input
-              name="location"
-              type="text"
-              placeholder="TRM, Thika Road"
-              value={form.location}
-              onChange={handleChange}
-              required
-            />
+            <div className="location-section">
+              <div className="location-section-header">
+                <label htmlFor="location">Location</label>
+              </div>
+
+              <input
+                id="location"
+                name="location"
+                type="text"
+                placeholder="Search location in Kenya"
+                value={form.location}
+                onChange={handleChange}
+                required
+                autoComplete="off"
+              />
+
+              {loadingLocations && (
+                <p className="location-search-state">Searching Kenya locations...</p>
+              )}
+
+              {!loadingLocations &&
+                form.location.trim().length >= 3 &&
+                locationSuggestions.length > 0 && (
+                  <ul className="location-suggestions">
+                    {locationSuggestions.map((suggestion) => (
+                      <li key={suggestion.place_id}>
+                        <button
+                          type="button"
+                          className="location-suggestion-btn"
+                          onClick={() => handleLocationSelect(suggestion)}
+                        >
+                          {suggestion.display_name}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+
+              <p className="location-help-text">
+                {locationStatus ||
+                  "Search and select a Kenya location, or tap the map to pin and validate it."}
+              </p>
+
+              <div className="report-location-map-wrap">
+                <MapContainer
+                  center={selectedPosition}
+                  zoom={15}
+                  scrollWheelZoom
+                  className="report-location-map"
+                >
+                  <TileLayer
+                    attribution="&copy; OpenStreetMap contributors"
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  />
+                  <Marker position={selectedPosition} />
+                  <MapClickHandler onSelect={handleMapSelect} />
+                </MapContainer>
+              </div>
+
+              <p className="coordinates-text">
+                Selected coordinates: {formatCoordinates(form.latitude, form.longitude)}
+              </p>
+            </div>
+
+            {locationError && <p className="location-error">{locationError}</p>}
 
             <label>
               Upload Pictures / Videos <span>(optional)</span>

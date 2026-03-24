@@ -7,6 +7,83 @@
   box-sizing: border-box;
 }
 
+.mobile-profile-page {
+  min-height: 100%;
+}
+
+.admin-profile-page {
+  min-height: calc(100vh - 48px);
+  border-radius: 0;
+  padding: 40px clamp(20px, 4vw, 42px);
+  background: linear-gradient(180deg, #f7f9fb 0%, #edf1f5 100%);
+}
+
+.profile-header-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.profile-header-copy h1 {
+  margin: 0;
+  font-size: clamp(1.8rem, 2.8vw, 2.4rem);
+  color: #101828;
+}
+
+.profile-header-copy p {
+  margin: 8px 0 0;
+  color: #667085;
+  max-width: 620px;
+  line-height: 1.5;
+}
+
+.profile-eyebrow {
+  margin: 0 0 6px !important;
+  color: #d71919 !important;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.profile-content-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.admin-profile-shell {
+  display: grid;
+  grid-template-columns: minmax(240px, 320px) minmax(0, 1fr);
+  align-items: start;
+  gap: 24px;
+}
+
+.profile-avatar-card,
+.profile-form-card {
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(16, 24, 40, 0.06);
+  box-shadow: 0 16px 36px rgba(15, 23, 42, 0.08);
+}
+
+.mobile-profile-shell .profile-avatar-card,
+.mobile-profile-shell .profile-form-card {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+.profile-avatar-card {
+  border-radius: 28px;
+  padding: 24px 20px;
+}
+
+.profile-form-card {
+  border-radius: 28px;
+  padding: 24px 20px;
+}
+
 .profile-back-btn {
   border: none;
   background: transparent;
@@ -16,4 +93,33 @@
   cursor: pointer;
   padding: 0;
   margin-bottom: 8px;
+}
+
+admin-profile-page .profile-back-btn {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: #fff;
+  border: 1px solid rgba(16, 24, 40, 0.08);
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
+  flex-shrink: 0;
+}
+
+.profile-status-message {
+  min-height: 180px;
+  display: grid;
+  place-items: center;
+  color: #344054;
+  font-weight: 600;
+}
+
+@media (max-width: 900px) {
+  .admin-profile-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-profile-page {
+    min-height: auto;
+    padding: 24px 16px 28px;
+  }
 }

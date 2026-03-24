@@ -6,7 +6,8 @@ import "./ReporterMenu.css";
 export default function ReporterMenu() {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user, logout, isAuthenticated } = useAuth();
+  const isGuest = !isAuthenticated;
 
   const touchStartX = useRef(0);
   const touchEndX = useRef(0);
@@ -55,8 +56,8 @@ export default function ReporterMenu() {
         <div className="menu-header">
           <div className="menu-user-icon">◉</div>
           <div>
-            <h3>{user?.name ?? user?.fullname ?? "Your Account"}</h3>
-            <p>{user?.email ?? "No email available"}</p>
+            <h3>{isGuest ? "Guest Reporter" : user?.name ?? user?.fullname ?? "Your Account"}</h3>
+            <p>{isGuest ? "Emergency reporting only" : user?.email ?? "No email available"}</p>
           </div>
         </div>
 
@@ -69,62 +70,63 @@ export default function ReporterMenu() {
           <span>›</span>
         </button>
 
-        <button
-          className="menu-item"
-          onClick={() => goTo("/reporter/my-reports?tab=mine")}
-        >
-          <span>REPORTED BY YOU</span>
-          <span>›</span>
-        </button>
+        {!isGuest && (
+          <>
+            <button
+              className="menu-item"
+              onClick={() => goTo("/reporter/my-reports?tab=mine")}
+            >
+              <span>REPORTED BY YOU</span>
+              <span>›</span>
+            </button>
 
         <button
-          className="menu-item"
-          onClick={() => goTo("/reporter/my-reports?tab=others")}
-        >
-          <span>REPORTED BY OTHERS</span>
-          <span>›</span>
-        </button>
+              className="menu-item"
+              onClick={() => goTo("/reporter/my-reports?tab=others")}
+            >
+              <span>REPORTED BY OTHERS</span>
+              <span>›</span>
+            </button>
+          </>
+        )}
 
         <hr />
 
         <p className="menu-section">PRIVACY & SAFETY</p>
 
-        <button
-            className="menu-item"
-            onClick={() => {
-                navigate("/account/profile");
-                setOpen(false);
-            }}
-            >
+        {isGuest ? (
+          <button className="menu-item" onClick={() => goTo("/login")}>
+            <span>SIGN IN FOR TRACKING</span>
+            <span>›</span>
+          </button>
+        ) : (
+          <button className="menu-item" onClick={() => goTo("/account/profile")}>
             <span>ACCOUNT</span>
             <span>›</span>
-        </button>
+          </button>
+        )}
 
         <hr />
 
         <p className="menu-section danger-title">DANGER ZONE</p>
 
-        <button
-          className="menu-item danger"
-          onClick={() => {
-            logout();
-            goTo("/login");
-          }}
-        >
-          <span>LOGOUT</span>
-          <span>›</span>
-        </button>
-
-        <button
-          className="menu-item danger"
-          onClick={() => {
-            setOpen(false);
-            alert("Delete account flow later");
-          }}
-        >
-          <span>DELETE</span>
-          <span>›</span>
-        </button>
+        {isGuest ? (
+          <button className="menu-item danger" onClick={() => goTo("/register")}>
+            <span>CREATE ACCOUNT</span>
+            <span>›</span>
+          </button>
+        ) : (
+          <button
+            className="menu-item danger"
+            onClick={() => {
+              logout();
+              goTo("/login");
+            }}
+          >
+            <span>LOGOUT</span>
+            <span>›</span>
+          </button>
+        )}
       </aside>
     </>
   );

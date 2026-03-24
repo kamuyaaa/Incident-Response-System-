@@ -37,19 +37,22 @@ const getIncidentById = asyncHandler(async (req, res) => {
 });
 
 const createIncident = asyncHandler(async (req, res) => {
-  const { reporterId, type, description, location, priority = 'Medium' } = req.body;
+  const { reporterId, type, description, location, latitude, longitude, priority = 'Medium' } = req.body;
+  const normalizedReporterId = reporterId?.trim() || 'guest';
 
-  if (!reporterId || !type || !description || !location) {
-    return res.status(400).json({ message: 'reporterId, type, description and location are required' });
+   if (!reporterId || !type || !description || !location || latitude == null || longitude == null) {
+    return res.status(400).json({ message: 'reporterId, type, description, location, latitude and longitude are required' });
   }
 
   const incidentsCount = await Incident.countDocuments();
   const incident = await Incident.create({
     id: `INC-${10000 + incidentsCount + 1}`,
-    reporterId,
+    reporterId: normalizedReporterId,
     type,
     description,
     location,
+    latitude,
+    longitude,
     status: 'Unassigned',
     priority,
     responderId: null,

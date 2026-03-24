@@ -36,6 +36,21 @@
   min-width: 20px;
 }
 
+.profile-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+
+.profile-form.admin-profile-form .profile-actions {
+  flex-direction: row;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+}
+
+
 .profile-save-btn {
   margin-top: 18px;
   width: 100%;
@@ -59,4 +74,11 @@
   font-size: 1rem;
   font-weight: 700;
   cursor: pointer;
+}
+
+.profile-form.admin-profile-form .profile-save-btn,
+.profile-form.admin-profile-form .profile-cancel-btn {
+  width: auto;
+  min-width: 170px;
+  padding: 0 24px;
 }

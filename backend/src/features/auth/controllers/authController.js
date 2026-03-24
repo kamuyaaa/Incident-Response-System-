@@ -65,7 +65,30 @@ const login = asyncHandler(async (req, res) => {
   });
 });
 
+const forgotPassword = asyncHandler(async (req, res) => {
+  const { email, phone, newPassword } = req.body;
+
+  if (!email || !phone || !newPassword) {
+    return res.status(400).json({ message: 'email, phone and newPassword are required' });
+  }
+
+  const user = await User.findOne({
+    email: email.toLowerCase(),
+    phone,
+  });
+
+  if (!user) {
+    return res.status(404).json({ message: 'No account matches the provided email and phone number' });
+  }
+
+  user.password = newPassword;
+  await user.save();
+
+  return res.json({ message: 'Password reset successful. You can now log in with your new password.' });
+});
+
 module.exports = {
   register,
   login,
+  forgotPassword,
 };

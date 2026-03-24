@@ -25,9 +25,13 @@ export default function Landing() {
           Get Started
         </button>
 
-        <p className="guest-link" onClick={() => navigate("/login")}>
+        <button
+          className="guest-link"
+          type="button"
+          onClick={() => navigate("/reporter/report")}
+        >
           Continue as a Guest
-        </p>
+        </button>
       </div>
     </PhoneFrame>
   );

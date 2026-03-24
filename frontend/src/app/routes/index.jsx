@@ -11,6 +11,7 @@ import RoleRoute from "./RoleRoute";
 import Landing from "../../features/public/pages/Landing";
 import Login from "../../features/auth/pages/Login";
 import Register from "../../features/auth/pages/Register";
+import ForgotPassword from "../../features/auth/pages/ForgotPassword";
 
 
 import Profile from "../../features/account/pages/Profile";
@@ -37,6 +38,7 @@ export default function AppRoutes() {
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/unauthorized" element={<Unauthorized />} />
         </Route>
 
