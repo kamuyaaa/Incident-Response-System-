@@ -1,12 +1,11 @@
 import { useState } from "react";
 import "./ProfileForm.css";
 
-export default function ProfileForm({ initialData, onSave, onCancel }) {
+export default function ProfileForm({ initialData, onSave, onCancel, isAdmin = false }) {
   const [formData, setFormData] = useState({
     fullname: initialData?.fullname ?? initialData?.name ?? "",
     email: initialData?.email ?? "",
     phone: initialData?.phone ?? "",
-    password: initialData?.password ?? "",
   });
 
   const handleChange = (e) => {
@@ -24,7 +23,10 @@ export default function ProfileForm({ initialData, onSave, onCancel }) {
   };
 
   return (
-    <form className="profile-form" onSubmit={handleSubmit}>
+    <form
+      className={`profile-form ${isAdmin ? "admin-profile-form" : ""}`.trim()}
+      onSubmit={handleSubmit}
+    >
       <div className="profile-field">
         <label htmlFor="fullname">Full name</label>
         <div className="profile-input-row">
@@ -71,24 +73,6 @@ export default function ProfileForm({ initialData, onSave, onCancel }) {
             value={formData.phone}
             onChange={handleChange}
             placeholder="+254 700 000 000"
-            required
-          />
-          <span className="edit-icon" aria-hidden="true">
-            ✎
-          </span>
-        </div>
-      </div>
-
-      <div className="profile-field">
-        <label htmlFor="password">Password</label>
-        <div className="profile-input-row">
-          <input
-            id="password"
-            name="password"
-            type="password"
-            value={formData.password}
-            onChange={handleChange}
-            placeholder="**********"
             required
           />
           <span className="edit-icon" aria-hidden="true">

@@ -8,6 +8,10 @@ const authService = {
   login(payload) {
     return apiClient.post("/auth/login", payload);
   },
+  
+  forgotPassword(payload) {
+    return apiClient.post("/auth/forgot-password", payload);
+  },
 };
 
 export default authService;

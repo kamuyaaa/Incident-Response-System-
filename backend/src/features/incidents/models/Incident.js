@@ -28,6 +28,14 @@ const incidentSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    latitude: {
+      type: Number,
+      required: true,
+    },
+    longitude: {
+      type: Number,
+      required: true,
+    },
     status: {
       type: String,
       enum: ['Unassigned', 'Assigned', 'In Progress', 'Completed'],

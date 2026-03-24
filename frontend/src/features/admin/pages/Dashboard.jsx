@@ -142,9 +142,9 @@ export default function Dashboard() {
                 <button
                   className="assign-btn"
                   onClick={() => setSelectedIncident(incident)}
-                  disabled={incident.status === "Assigned"}
+                   disabled={incident.status !== "Unassigned"}
                 >
-                  {incident.status === "Assigned" ? "Already Assigned" : "Assign Responder"}
+                  {incident.status === "Unassigned" ? "Assign Responder" : "Already Assigned"}
                 </button>
               </div>
             ))}
@@ -166,7 +166,7 @@ export default function Dashboard() {
               {incidents.map((incident, index) => (
                 <Marker
                   key={incident.id}
-                  position={incident.coords || [center[0] + index * 0.01, center[1] + index * 0.01]}
+                  position={incident.coords || (incident.latitude != null && incident.longitude != null ? [incident.latitude, incident.longitude] : [center[0] + index * 0.01, center[1] + index * 0.01])}
                 >
                   <Popup>
                     <strong>{incident.type}</strong>
@@ -197,8 +197,8 @@ export default function Dashboard() {
                 </Marker>
               ))}
 
-              {selectedIncident && selectedResponderData && selectedIncident.coords && selectedResponderData.coords && (
-                <Polyline positions={[selectedResponderData.coords, selectedIncident.coords]} />
+              {selectedIncident && selectedResponderData && (selectedIncident.coords || (selectedIncident.latitude != null && selectedIncident.longitude != null)) && selectedResponderData.coords && (
+                <Polyline positions={[selectedResponderData.coords, selectedIncident.coords || [selectedIncident.latitude, selectedIncident.longitude]]} />
               )}
             </MapContainer>
           </div>

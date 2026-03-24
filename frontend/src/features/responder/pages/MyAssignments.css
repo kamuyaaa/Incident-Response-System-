@@ -210,3 +210,34 @@
   grid-template-columns: 1fr;
   gap: 10px;
 }
+
+.navigation-panel {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid #efefef;
+}
+
+.navigation-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.compact-btn {
+  padding: 8px 12px;
+  font-size: 0.78rem;
+}
+
+.assignment-map-wrap {
+  margin-top: 10px;
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid #dcdcdc;
+}
+
+.assignment-map {
+  width: 100%;
+  height: 200px;
+}

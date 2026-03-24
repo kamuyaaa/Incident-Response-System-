@@ -13,14 +13,13 @@ const getProfile = asyncHandler(async (req, res) => {
     fullname: user.fullname,
     email: user.email,
     phone: user.phone,
-    password: '**********',
     profilePhoto: user.profilePhoto || '',
   });
 });
 
 const updateProfile = asyncHandler(async (req, res) => {
   const { userId } = req.params;
-  const { fullname, email, phone, password, profilePhoto } = req.body;
+  const { fullname, email, phone, profilePhoto } = req.body;
 
   const user = await User.findOne({ id: userId });
   if (!user) {
@@ -37,7 +36,6 @@ const updateProfile = asyncHandler(async (req, res) => {
   user.fullname = fullname ?? user.fullname;
   user.email = email ? email.toLowerCase() : user.email;
   user.phone = phone ?? user.phone;
-  user.password = password ?? user.password;
   user.profilePhoto = profilePhoto ?? user.profilePhoto;
   await user.save();
 
@@ -47,7 +45,6 @@ const updateProfile = asyncHandler(async (req, res) => {
       fullname: user.fullname,
       email: user.email,
       phone: user.phone,
-      password: '**********',
       profilePhoto: user.profilePhoto || '',
     },
   });

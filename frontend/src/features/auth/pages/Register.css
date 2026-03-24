@@ -3,14 +3,14 @@
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  padding: 42px 18px 24px;
+  padding: 32px 18px 24px;
   box-sizing: border-box;
   background: #f3f3f3;
 }
 
 .register-card {
   width: 100%;
-  max-width: 290px;
+  max-width: 320px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -18,17 +18,17 @@
 }
 
 .register-logo {
-  width: 90px;
-  height: 90px;
+  width: 84px;
+  height: 84px;
   object-fit: contain;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
 }
 
 .register-title {
-  font-size: 1.8rem;
+  font-size: 1.75rem;
   font-weight: 700;
   color: #111;
-  margin-bottom: 22px;
+  margin-bottom: 20px;
   text-align: center;
 }
 
@@ -38,7 +38,7 @@
 
 .register-field {
   width: 100%;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
 }
 
 .register-field label {
@@ -51,11 +51,11 @@
 .register-field input,
 .register-field select {
   width: 100%;
-  height: 44px;
+  height: 42px;
   border: 1px solid #8e8e8e;
   border-radius: 999px;
   padding: 0 16px;
-  font-size: 1rem;
+  font-size: 0.96rem;
   background: transparent;
   outline: none;
   box-sizing: border-box;
@@ -74,23 +74,23 @@
 
 .register-btn {
   width: 100%;
-  height: 44px;
+  min-height: 44px;
   border: none;
   border-radius: 999px;
   background: #df161c;
   color: #fff;
-  font-size: 1rem;
+  font-size: 0.96rem;
   font-weight: 700;
   cursor: pointer;
-  margin-top: 10px;
+  margin-top: 8px;
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
 }
 
 .login-text {
-  font-size: 0.95rem;
+  font-size: 0.92rem;
   color: #222;
   text-align: center;
-  margin: 20px 0 0;
+  margin: 16px 0 0;
 }
 
 .login-text span {
