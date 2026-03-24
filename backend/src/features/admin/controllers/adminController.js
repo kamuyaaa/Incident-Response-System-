@@ -52,6 +52,12 @@ const assignResponder = asyncHandler(async (req, res) => {
     return res.status(404).json({ message: "Incident not found" });
   }
 
+  if (incident.status !== "Unassigned") {
+    return res.status(409).json({
+      message: `Incident ${incident.id} is already assigned and cannot be reassigned`,
+    });
+  }
+  
   const responder = await User.findOne({ id: responderId, role: "responder" });
   if (!responder) {
     return res.status(400).json({ message: "Valid responderId is required" });

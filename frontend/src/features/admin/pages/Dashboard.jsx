@@ -142,9 +142,9 @@ export default function Dashboard() {
                 <button
                   className="assign-btn"
                   onClick={() => setSelectedIncident(incident)}
-                  disabled={incident.status === "Assigned"}
+                   disabled={incident.status !== "Unassigned"}
                 >
-                  {incident.status === "Assigned" ? "Already Assigned" : "Assign Responder"}
+                  {incident.status === "Unassigned" ? "Assign Responder" : "Already Assigned"}
                 </button>
               </div>
             ))}
