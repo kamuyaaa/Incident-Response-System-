@@ -1,8 +1,8 @@
 import PhoneFrame from "../../../shared/components/PhoneFrame";
 import "./ReportDetails.css";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { useEffect, useMemo, useState } from "react";
-import { MapContainer, Marker, TileLayer, useMapEvents } from "react-leaflet";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { MapContainer, Marker, TileLayer, useMap, useMapEvents } from "react-leaflet";
 import L from "leaflet";
 import ReporterMenu from "../components/ReporterMenu";
 import { useAuth } from "../../../shared/hooks/useAuth";
@@ -28,6 +28,16 @@ function MapClickHandler({ onSelect }) {
       onSelect(lat, lng);
     },
   });
+
+  return null;
+}
+
+function MapAutoCenter({ position }) {
+  const map = useMap();
+
+  useEffect(() => {
+    map.setView(position, map.getZoom(), { animate: true });
+  }, [map, position]);
 
   return null;
 }
@@ -64,6 +74,62 @@ export default function ReportDetails() {
     [form.latitude, form.longitude]
   );
 
+  const setCurrentLocationDetails = useCallback(async (lat, lng) => {
+    setForm((prev) => ({
+      ...prev,
+      latitude: lat,
+      longitude: lng,
+      location: `Current location (${formatCoordinates(lat, lng)})`,
+    }));
+    setSelectedSuggestion({
+      display_name: `Current location (${formatCoordinates(lat, lng)})`,
+      lat,
+      lon: lng,
+    });
+    setLocationError("");
+    setLocationSuggestions([]);
+
+    try {
+      const url = new URL("https://nominatim.openstreetmap.org/reverse");
+      url.searchParams.set("format", "json");
+      url.searchParams.set("lat", lat);
+      url.searchParams.set("lon", lng);
+      url.searchParams.set("zoom", "18");
+      url.searchParams.set("addressdetails", "1");
+
+      const response = await fetch(url.toString(), {
+        headers: {
+          "Accept-Language": "en",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Unable to reverse geocode current location");
+      }
+
+      const data = await response.json();
+      const displayName =
+        data?.display_name || `Current location (${formatCoordinates(lat, lng)})`;
+
+      setForm((prev) => ({
+        ...prev,
+        location: displayName,
+      }));
+      setSelectedSuggestion({ display_name: displayName, lat, lon: lng });
+
+      const countryCode = data?.address?.country_code?.toLowerCase();
+      if (countryCode === "ke") {
+        setLocationStatus("Current location loaded and validated in Kenya.");
+      } else {
+        setLocationStatus("Current location loaded from your device.");
+      }
+    } catch {
+      setLocationStatus(
+        "Current location loaded from your device. You can refine it by searching."
+      );
+    }
+  }, []);
+
   useEffect(() => {
     if (!navigator.geolocation) {
       setLocationStatus(
@@ -74,26 +140,8 @@ export default function ReportDetails() {
 
     navigator.geolocation.getCurrentPosition(
       ({ coords }) => {
-        const isLikelyInKenya =
-          coords.latitude >= -5 &&
-          coords.latitude <= 6 &&
-          coords.longitude >= 33 &&
-          coords.longitude <= 42;
-
-        if (isLikelyInKenya) {
-          setForm((prev) => ({
-            ...prev,
-            latitude: coords.latitude,
-            longitude: coords.longitude,
-          }));
-          setLocationStatus(
-            "Current location loaded. Search and select the exact Kenya location to confirm."
-          );
-        } else {
-          setLocationStatus(
-            "Your detected location seems outside Kenya. Please search and pick a Kenya location."
-          );
-        }
+        
+       setCurrentLocationDetails(coords.latitude, coords.longitude);
       },
       () => {
         setLocationStatus(
@@ -102,7 +150,7 @@ export default function ReportDetails() {
       },
       { enableHighAccuracy: true, timeout: 10000 }
     );
-  }, []);
+   }, [setCurrentLocationDetails]);
 
   useEffect(() => {
     const query = form.location.trim();
@@ -136,7 +184,14 @@ export default function ReportDetails() {
         }
 
         const data = await response.json();
-        setLocationSuggestions(Array.isArray(data) ? data : []);
+        const suggestions = Array.isArray(data) ? data : [];
+        setLocationSuggestions(suggestions);
+
+        if (suggestions.length > 0) {
+          handleLocationSelect(suggestions[0], {
+            statusMessage: "Top search result pinned automatically. Adjust by tapping another suggestion or map point.",
+          });
+        }
       } catch (error) {
         if (error.name !== "AbortError") {
           setLocationSuggestions([]);
@@ -222,7 +277,8 @@ export default function ReportDetails() {
     }
   };
 
-  const handleLocationSelect = (suggestion) => {
+  const handleLocationSelect = (suggestion, options = {}) => {
+    const { statusMessage = "Kenya location selected and pinned on map." } = options;
     const lat = Number(suggestion.lat);
     const lng = Number(suggestion.lon);
 
@@ -236,6 +292,7 @@ export default function ReportDetails() {
     setLocationSuggestions([]);
     setLocationError("");
     setLocationStatus("Kenya location selected and pinned on map.");
+    setLocationStatus(statusMessage);
   };
 
   const handleFinalSubmit = async () => {
@@ -243,10 +300,12 @@ export default function ReportDetails() {
 
     try {
       await reporterService.createIncident({
-        reporterId: user.id,
+        reporterId: user?.id ?? "guest",
         type,
         description: form.description,
         location: form.location,
+        latitude: form.latitude,
+        longitude: form.longitude,
       });
 
       setShowConfirm(false);
@@ -367,6 +426,7 @@ export default function ReportDetails() {
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                   />
                   <Marker position={selectedPosition} />
+                  <MapAutoCenter position={selectedPosition} />
                   <MapClickHandler onSelect={handleMapSelect} />
                 </MapContainer>
               </div>
