@@ -2,20 +2,41 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import "./incidentdescription.css";
 
-function IncidentDescription() {const { type } = useParams();
+function IncidentDescription() {
+  const { type } = useParams();
+  const navigate = useNavigate();
+
   const [menuOpen, setMenuOpen] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [showSubmitConfirm, setShowSubmitConfirm] = useState(false);
   const [actionType, setActionType] = useState("");
   const profileImage = null; 
 
-  const navigate = useNavigate();
+  const [loadingLocation, setLoadingLocation] = useState(false);
+  const [locationError, setLocationError] = useState("");
+  const [locationSuccess, setLocationSuccess] = useState(false);
+
+  const [user, setUser] = useState({
+    name: "",
+    email: ""
+  });
+    
+  useEffect(() => {
+    const storedUser = JSON.parse(localStorage.getItem("user"));
+    
+      if (storedUser) {
+        setUser(storedUser);
+      }
+  }, []);
 
   const [incidentId, setIncidentId] = useState("");
   const [description, setDescription] = useState("");
   const [casualties, setCasualties] = useState("");
   const [location, setLocation] = useState("");
   const [files, setFiles] = useState([]);
+  const [preview, setPreview] = useState([]);
 
+  // Logout & Delete with confirmation
   const handleLogout = () => {
     setActionType("logout");
     setShowConfirm(true);
@@ -29,25 +50,32 @@ function IncidentDescription() {const { type } = useParams();
   const confirmAction = () => {
     setShowConfirm(false);
     setMenuOpen(false);
+    
+    if (actionType === "logout") {
+      localStorage.removeItem("user");
+    }
+
     navigate("/");
   };
-    
+  
+  // Cancel action (logout/delete)
   const cancelAction = () => {
     setShowConfirm(false);
   };
   
+  // Generate unique incident ID 
   useEffect(() => {
      const id = "INC-" + Date.now();
       setIncidentId(id);
   }, []);
 
-  const handleFileUpload = (e) => {
-    setFiles([...e.target.files]);
-  };
-
+  // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
+    setShowSubmitConfirm(true);
+  };
 
+  const confirmSubmit = () => {
     const reportData = {
       incidentId,
       emergencyType: type,
@@ -59,12 +87,134 @@ function IncidentDescription() {const { type } = useParams();
 
     console.log("Report Submitted:", reportData);
 
+    setShowSubmitConfirm(false);
+
     navigate("/report-submitted");
   };
+
+  // Cancel form submission
+  const cancelSubmit = () => {
+    setShowSubmitConfirm(false);
+  };
+
+  // File upload and preview
+  const handleFileUpload = (e) => {
+    const selectedFiles = Array.from(e.target.files);
+    setFiles(selectedFiles);
+
+    const previewUrls = selectedFiles.map((file) =>
+      URL.createObjectURL(file)
+    );
+    setPreview(previewUrls);
+  };
+
+  // For location detection
+  const API_KEY = "AIzaSyARNxFLUKoTQoMZzGhscJnNJf6VbVL1W6o";
+    const getLocation = () => {
+      if (!navigator.geolocation) {
+        setLocationError("Geolocation not supported");
+        return;
+      }
+
+      setLoadingLocation(true);
+      setLocationError("");
+      setLocationSuccess(false);
+
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const lat = position.coords.latitude;
+          const lon = position.coords.longitude;
+
+          try {
+            const res = await fetch(
+              `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lon}&result_type=street_address|route|sublocality|neighborhood|premise&key=${API_KEY}`
+            );
+
+            const data = await res.json();
+
+            if (data.status !== "OK") {
+              setLocation(`Lat: ${lat}, Lon: ${lon}`);
+              setLocationError("Could not fetch address");
+              setLoadingLocation(false);
+              return;
+            }
+
+            const results = data.results;
+            
+            const bestResult =
+              results.find(r =>
+                r.types.includes("street_address") ||
+                r.types.includes("premise")
+              ) ||
+              results.find(r =>
+                r.types.includes("route")
+              ) ||
+              results.find(r =>
+                r.types.includes("neighborhood") ||
+                r.types.includes("sublocality") ||
+                r.types.includes("sublocality_level_1")
+              ) ||
+              results.find(r =>
+                r.types.includes("locality")
+              ) ||
+              results[0];
+
+            const components = bestResult.address_components;
+
+              const street =
+                components.find(c => c.types.includes("route"))?.long_name;
+
+              const area =
+                components.find(c =>
+                  c.types.includes("sublocality") ||
+                  c.types.includes("neighborhood")
+                )?.long_name;
+
+              const landmark =
+                bestResult.types.includes("point_of_interest")
+                  ? bestResult.formatted_address
+                  : null;
+
+              const city =
+                components.find(c => c.types.includes("locality"))?.long_name;
+
+              const country =
+                components.find(c => c.types.includes("country"))?.long_name;
+
+                const cleanAddress = [
+                  street,
+                  area,
+                  city
+                ]
+                  .filter(Boolean)
+                  .join(", ");
+
+              setLocation(cleanAddress || bestResult.formatted_address);
+            setLocationSuccess(true);
+
+          } catch (error) {
+            console.error(error);
+            setLocationError("Something went wrong");
+          }
+
+          setLoadingLocation(false);
+        },
+        () => {
+          setLocationError("Permission denied or unavailable");
+          setLoadingLocation(false);
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0
+        }
+      );
+    };
 
   return (
     <div className="incident-description-container">
       
+      {/* Icons */}
       <svg
         onClick={() => navigate(-1)}
         className="exit-arrow"
@@ -89,6 +239,7 @@ function IncidentDescription() {const { type } = useParams();
         <path d="M120-240v-80h720v80H120Zm0-200v-80h720v80H120Zm0-200v-80h720v80H120Z"/>
       </svg>
 
+      {/* Menu Popup */}
       {menuOpen && (
         <div className="menu-popup">
 
@@ -127,14 +278,8 @@ function IncidentDescription() {const { type } = useParams();
             </div>
 
             <div className="profile-info">
-              <h4>
-                John Doe
-              </h4>
-
-              <p>
-                johndoe@example.com
-              </p>
-
+              <h4>{user.name || "Guest User"}</h4>
+              <p>{user.email || "No email"}</p>
             </div>
           </Link>
 
@@ -288,6 +433,7 @@ function IncidentDescription() {const { type } = useParams();
         </div>
       )}
 
+      {/* Confirmation Popups for the dangerous actions */}
       {showConfirm && (
         <div className="confirm-overlay">
           <div className="confirm-box">
@@ -329,69 +475,148 @@ function IncidentDescription() {const { type } = useParams();
         </div>
       )}
       
+
+      {/* Confirmation Popup for the form submission */}
+      {showSubmitConfirm && (
+        <div className="confirm-overlay">
+          <div className="confirm-box">
+
+            <svg
+              className="arrow-icon"
+              xmlns="http://www.w3.org/2000/svg"
+              height="60"
+              viewBox="0 -960 960 960"
+              width="60"
+              fill="#CD1E1E"
+            >
+              <path d="M508.5-291.5Q520-303 520-320t-11.5-28.5Q497-360 480-360t-28.5 11.5Q440-337 440-320t11.5 28.5Q463-280 480-280t28.5-11.5ZM440-440h80v-240h-80v240Zm40 360q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z"/>
+            </svg>
+
+            <p>
+              Are you sure you want to submit this report?
+            </p>
+
+            <div className="confirm-buttons">
+
+              <button
+                className="confirm-btn"
+                onClick={confirmSubmit}
+              >
+                SUBMIT
+              </button>
+
+              <button
+                className="cancel-btn"
+                onClick={cancelSubmit}
+              >
+                CANCEL
+              </button>
+
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* Report Header and Info */}
       <div className="report-header">
         <h2>
-          Send Report
+          Report an Incident
         </h2>
       </div>
 
       <div className="report-info">
-        <p className="incident-id">
-          Incident ID: <br></br> {incidentId}
+        <p className="incident-type">
+          Emergency Type: {type}
         </p>
 
-        <p className="incident-type">
-          Emergency Type: <br></br> {type}
+        <p className="incident-id">
+          Incident ID: {incidentId}
         </p>
       </div>
       
+      {/* Incident Description Form */}
       <form onSubmit={handleSubmit}>
-
-        <label>
-          Description
-        </label>
-
-        <textarea
-          placeholder="Describe the situation..."
-          value={description}
-          required
-          onChange={(e) => setDescription(e.target.value)}
-        />
-
-        <label>
-          Any casualties? If yes, how many?
-        </label>
-
-        <input
-          type="text"
-          placeholder="Yes, 1 person"
-          value={casualties}
-          onChange={(e) => setCasualties(e.target.value)}
-        />
-
-        <label>
-          Location
-        </label>
-
-        <input
-          type="text"
-          placeholder="TRM, Thika Road"
-          value={location}
-          required
-          onChange={(e) => setLocation(e.target.value)}
-        />
-
-        <label>
-          Upload Pictures / Videos (optional)
-        </label>
-
-        <div className="upload-box">
-          <input
-            type="file"
-            multiple
-            onChange={handleFileUpload}
+        <label>Description</label>
+        <div className="input-group">
+          <textarea
+            placeholder=" "
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            required
           />
         </div>
+
+        {/* Casusalties */}
+        <label>Any casualties? If yes, how many?</label>
+        
+        <div className="input-group">
+          <input
+            type="text"
+            placeholder=" "
+            value={casualties}
+            onChange={(e) => setCasualties(e.target.value)}
+          />
+          
+        </div>
+
+        {/* Location */}
+        <label>Location</label>
+
+        <div className="input-group">
+          <input
+            type="text"
+            placeholder=" "
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
+            required
+          />
+          
+        </div>
+
+        <button
+          type="button"
+          className="location-btn"
+          onClick={getLocation}
+          disabled={loadingLocation}
+        >
+          {loadingLocation ? "Detecting location..." : " Use Current Location"}
+        </button>
+
+        {/* Show success or error messages for location detection */}
+        {locationSuccess && (
+          <p style={{ color: "green", fontSize: "12px" }}>
+            Location detected
+          </p>
+        )}
+
+        {locationError && (
+          <p style={{ color: "red", fontSize: "12px" }}>
+            {locationError}
+          </p>
+        )}
+
+        {/* File upload */}
+        <label>Upload Images/Videos (optional)</label>
+
+        <div className="upload-box">
+          <input 
+            type="file"
+            multiple onChange={handleFileUpload} 
+          />
+
+          {preview.length === 0 ? (
+            <p className="upload-placeholder">
+              Tap to upload images/videos
+            </p>
+          ) : (
+            <div className="preview-container">
+              {preview.map((src, i) => (
+                <img key={i} src={src} alt="preview" />
+              ))}
+            </div>
+          )}
+        </div>       
 
         <button className="submit-btn">
           SUBMIT REPORT

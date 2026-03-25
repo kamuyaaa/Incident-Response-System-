@@ -1,8 +1,21 @@
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./emailsent.css";
 
 function EmailSentPage() {
     const navigate = useNavigate();
+
+    const [user, setUser] = useState({
+        email: ""
+    });
+
+ 
+    useEffect(() => {
+        const storedUser = JSON.parse(localStorage.getItem("user"));
+        if (storedUser) {
+            setUser(storedUser);
+        }
+    }, []);
     
     return (
         <div className="sent-container">
@@ -22,7 +35,9 @@ function EmailSentPage() {
             <h2 className="title">E-mail Sent</h2>
 
             <p className="description-1">
-                We have sent a password reset link to your email address. Please check your inbox and follow the instructions to reset your password.
+                We have sent a password reset link to this{" "}
+                <strong>{user.email || "No email"}</strong>{" "}
+                email address. Please check your inbox and follow the instructions to reset your password.
             </p>
 
             <p className="description-2">
@@ -30,12 +45,11 @@ function EmailSentPage() {
             </p>
             
             <div className="button-group">
-
-                <button className="try-again-btn" onClick={() => window.location.href = "/forgot-password"}>
+                <button className="try-again-btn"  onClick={() => navigate("/forgot-password")}>
                     Try Again
                 </button>
 
-                <button className="back-to-login-btn" onClick={() => window.location.href = "/login"}>
+                <button className="back-to-login-btn" onClick={() => navigate("/login")}>
                     Back to Login
                 </button>
             </div>

@@ -1,11 +1,29 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./forgotpassword.css";
 
 function ForgotPasswordPage() {
     const navigate = useNavigate();
 
+    const [email, setEmail] = useState("");
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+
+        const storedUser = JSON.parse(localStorage.getItem("user"));
+
+        if (!storedUser || storedUser.email !== email) {
+            alert("Email not found. Please check or register.");
+            return;
+        }
+
+        alert("Password reset link sent!");
+
+        navigate("/email-sent");
+    };
+
     return (
-        <div className="forgot-container">
+        <form className="forgot-container" onSubmit={handleSubmit}> 
 
             <svg
                 onClick={() => navigate(-1)}
@@ -30,14 +48,17 @@ function ForgotPasswordPage() {
                 <input
                     type="email"
                     placeholder="Enter your email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
                 />
             </div>
             
-            <button className="reset-link-btn" onClick={() => window.location.href = "/email-sent"}>
+            <button className="reset-link-btn" type="submit">
                 Send Reset Link to Your Email
             </button>
 
-        </div>
+        </form>
     );
 }
 

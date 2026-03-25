@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "./incidentcategories.css";
 
@@ -7,7 +7,21 @@ function IncidentCategories() {
     const [showConfirm, setShowConfirm] = useState(false);
     const [actionType, setActionType] = useState("");
     const profileImage = null; 
+
     const navigate = useNavigate(); 
+
+    const [user, setUser] = useState({
+            name: "",
+            email: ""
+        });
+    
+        useEffect(() => {
+            const storedUser = JSON.parse(localStorage.getItem("user"));
+    
+            if (storedUser) {
+                setUser(storedUser);
+            }
+        }, []);
     
     const handleLogout = () => {
         setActionType("logout");
@@ -22,6 +36,10 @@ function IncidentCategories() {
     const confirmAction = () => {
         setShowConfirm(false);
         setMenuOpen(false);
+        if (actionType === "logout") {
+            localStorage.removeItem("user");
+        }
+
         navigate("/");
     };
     
@@ -93,8 +111,8 @@ function IncidentCategories() {
                         </div>
 
                         <div className="profile-info">
-                            <h4>John Doe</h4>
-                            <p>johndoe@example.com</p>
+                            <h4>{user.name || "Guest User"}</h4>
+                            <p>{user.email || "No email"}</p>
                         </div>
                     </Link>
 

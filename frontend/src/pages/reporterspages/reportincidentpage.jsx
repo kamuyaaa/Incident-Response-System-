@@ -1,5 +1,5 @@
-import { useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 import "./reportincidentpage.css";  
 
 function ReportIncidentPage() {
@@ -9,6 +9,19 @@ function ReportIncidentPage() {
     const profileImage = null; 
 
     const navigate = useNavigate(); 
+
+    const [user, setUser] = useState({
+        name: "",
+        email: ""
+    });
+
+    useEffect(() => {
+        const storedUser = JSON.parse(localStorage.getItem("user"));
+
+        if (storedUser) {
+            setUser(storedUser);
+        }
+    }, []);
 
     const handleLogout = () => {
         setActionType("logout");
@@ -23,6 +36,11 @@ function ReportIncidentPage() {
     const confirmAction = () => {
         setShowConfirm(false);
         setMenuOpen(false);
+
+        if (actionType === "logout") {
+            localStorage.removeItem("user");
+        }
+
         navigate("/");
     };
 
@@ -83,8 +101,8 @@ function ReportIncidentPage() {
                         </div>
 
                         <div className="profile-info">
-                            <h4>John Doe</h4>
-                            <p>johndoe@example.com</p>
+                            <h4>{user.name || "Guest User"}</h4>
+                            <p>{user.email || "No email"}</p>
                         </div>
                     </Link>
 
