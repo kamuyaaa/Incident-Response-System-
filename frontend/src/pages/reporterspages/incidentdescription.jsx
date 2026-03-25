@@ -109,7 +109,7 @@ function IncidentDescription() {
   };
 
   // For location detection
-  const API_KEY = " ";
+  const API_KEY = import.meta.env.VITE_GOOGLE_API_KEY;
     const getLocation = () => {
       if (!navigator.geolocation) {
         setLocationError("Geolocation not supported");
