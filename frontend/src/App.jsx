@@ -24,7 +24,7 @@ import IncidentCategories from "./pages/reporterspages/incidentcategories";
 
 import IncidentDescription from "./pages/reporterspages/incidentdescription";
 
-function App() {
+function App() { 
   return (
     <Routes>
       <Route path="/" element={<Homepage />} />

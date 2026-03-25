@@ -109,7 +109,7 @@ function IncidentDescription() {
   };
 
   // For location detection
-  const API_KEY = "AIzaSyARNxFLUKoTQoMZzGhscJnNJf6VbVL1W6o";
+  const API_KEY = " ";
     const getLocation = () => {
       if (!navigator.geolocation) {
         setLocationError("Geolocation not supported");
