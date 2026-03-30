@@ -1,6 +1,6 @@
 import PhoneFrame from "../../../shared/components/PhoneFrame";
 import "./MyAssignments.css";
-import ReporterMenu from "../../reporter/components/ReporterMenu";
+import ResponderMenu from "../components/ResponderMenu";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
 import { MapContainer, Marker, Polyline, TileLayer } from "react-leaflet";
@@ -126,7 +126,7 @@ export default function MyAssignments() {
   return (
     <PhoneFrame>
       <div className="responder-dashboard">
-        <ReporterMenu />
+        <ResponderMenu />
 
         <div className="responder-header">
           <h2>Hi {user?.name || "Responder"},</h2>
@@ -223,7 +223,7 @@ export default function MyAssignments() {
           <h3>Quick Actions</h3>
 
           <div className="quick-actions-grid">
-            <button onClick={() => navigate("/responder")}>View Assignments</button>
+            <button onClick={() => navigate("/responder/updates")}>View Assignments</button>
             <button onClick={() => navigate("/responder/updates")}>Update Status</button>
             <button className="secondary-btn">Call Admin</button>
           </div>

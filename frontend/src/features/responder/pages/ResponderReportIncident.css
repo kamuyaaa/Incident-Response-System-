@@ -1,0 +1,89 @@
+.report-incident-page {
+  position: relative;
+  height: 100%;
+  background: #f3f3f3;
+  border-radius: 32px;
+  padding: 16px 18px 16px;
+  box-sizing: border-box;
+}
+
+/* top bar */
+
+.report-incident-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+/* back button */
+
+.back-btn {
+  padding-top: 10px;
+  background: transparent;
+  border: none;
+  font-size: 1.8rem;
+  cursor: pointer;
+}
+
+/* title */
+
+.report-incident-title {
+  padding-top: 50px;
+  text-align: center;
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: #111;
+  line-height: 1.25;
+  margin: 8px 0 18px;
+}
+
+/* category list */
+
+.incident-category-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+/* category cards */
+
+.incident-category-card {
+  width: 100%;
+  border: none;
+  background: #ead0d0;
+  border-radius: 18px;
+  padding: 12px 14px;
+
+  display: flex;
+  align-items: center;
+  gap: 20px;
+
+  cursor: pointer;
+  text-align: left;
+
+  box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+  transition: transform 0.18s ease;
+}
+
+.incident-category-card:hover {
+  transform: translateY(-2px);
+}
+
+/* icon */
+
+.incident-category-icon {
+  font-size: 1.3rem;
+  width: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* label */
+
+.incident-category-label {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #111;
+}

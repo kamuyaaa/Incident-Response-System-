@@ -1,11 +1,11 @@
 import { useRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../../shared/hooks/useAuth";
-import "./ReporterMenu.css";
+import "./ResponderMenu.css";
 
 export default function ReporterMenu() {
   const [open, setOpen] = useState(false);
-  const navigate = useNavigate();
+  const navigate = useNavigate(); 
   const location = useLocation();
   const { user, logout, isAuthenticated } = useAuth();
   const isGuest = !isAuthenticated;
@@ -72,8 +72,8 @@ export default function ReporterMenu() {
         <p className="menu-section">GENERAL</p>
 
         <button 
-          className={`menu-item ${isActive("/reporter/report") ? "active" : ""}`} 
-          onClick={() => goTo("/reporter/report")}
+          className={`menu-item ${isActive("/responder/report/new") ? "active" : ""}`} 
+          onClick={() => goTo("/responder/report/new")}
         >
           <span>REPORT AN INCIDENT</span>
           <span>›</span>
@@ -82,19 +82,27 @@ export default function ReporterMenu() {
         {!isGuest && (
           <>
             <button
-              className={`menu-item ${isActiveTab("/reporter/my-reports?tab=mine") ? "active" : ""}`}
-              onClick={() => goTo("/reporter/my-reports?tab=mine")}
+              className={`menu-item ${isActiveTab("/responder/report?tab=mine") ? "active" : ""}`}
+              onClick={() => goTo("/responder/report?tab=mine")}
             >
               <span>REPORTED BY YOU</span>
               <span>›</span>
             </button>
 
-        <button
-              className={`menu-item ${isActiveTab("/reporter/my-reports?tab=others") ? "active" : ""}`}
-              onClick={() => goTo("/reporter/my-reports?tab=others")}
-            >
-              <span>REPORTED BY OTHERS</span>
-              <span>›</span>
+            <button
+              className={`menu-item ${isActiveTab("/responder/report?tab=others") ? "active" : ""}`}
+              onClick={() => goTo("/responder/report?tab=others")}
+              >
+                <span>REPORTED BY OTHERS</span>
+                <span>›</span>
+            </button>
+            
+            <button
+              className={`menu-item ${isActiveTab("/responder/updates?tab=others") ? "active" : ""}`}
+              onClick={() => goTo("/responder/updates?tab=others")}
+              >
+                <span>VIEW ASSIGNED INCIDENTS</span>
+                <span>›</span>
             </button>
           </>
         )}

@@ -1,7 +1,7 @@
 import PhoneFrame from "../../../shared/components/PhoneFrame";
-import "./ReportIncident.css";
+import "./ResponderReportIncident.css";
 import { useNavigate } from "react-router-dom";
-import ReporterMenu from "../components/ReporterMenu";
+import ResponderMenu from "../components/ResponderMenu";
 
 const categories = [
   { id: "medical", icon: "🚨", label: "Medical Emergency" },
@@ -13,7 +13,7 @@ const categories = [
   { id: "other", icon: "📝", label: "Other" },
 ];
 
-export default function ReportIncident() {
+export default function ResponderReportIncident() {
   const navigate = useNavigate();
 
   return (
@@ -22,13 +22,13 @@ export default function ReportIncident() {
         <div className="report-incident-topbar">
           <button
             className="back-btn"
-            onClick={() => navigate(-1)}
+            onClick={() => navigate("/responder")}
             aria-label="Go back"
           >
             ←
           </button>
 
-          <ReporterMenu />
+          <ResponderMenu />
         </div>
 
         <h1 className="report-incident-title">
@@ -43,7 +43,7 @@ export default function ReportIncident() {
               key={category.id}
               className="incident-category-card"
               onClick={() =>
-                navigate(`/reporter/report/details?type=${category.id}`)
+                navigate(`/responder/report/details?type=${category.id}`)
               }
             >
               <span className="incident-category-icon">{category.icon}</span>
