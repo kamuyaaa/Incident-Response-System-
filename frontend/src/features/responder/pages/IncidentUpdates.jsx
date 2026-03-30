@@ -2,7 +2,7 @@ import PhoneFrame from "../../../shared/components/PhoneFrame";
 import "./IncidentUpdates.css";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
-import ReporterMenu from "../../reporter/components/ReporterMenu";
+import ResponderMenu from "../components/ResponderMenu";
 import { useAuth } from "../../../shared/hooks/useAuth";
 import responderService from "../services/responderService";
 
@@ -102,7 +102,7 @@ export default function IncidentUpdates() {
             ←
           </button>
 
-          <ReporterMenu />
+          <ResponderMenu />
         </div>
 
         <div className="assignments-tabs">

@@ -26,6 +26,9 @@ import MyReports from "../../features/reporter/pages/MyReports";
 
 import MyAssignments from "../../features/responder/pages/MyAssignments";
 import IncidentUpdates from "../../features/responder/pages/IncidentUpdates";
+import ResponderMyReports from "../../features/responder/pages/ResponderMyReports";
+import ResponderReportDetails from "../../features/responder/pages/ResponderReportDetails";
+import ResponderReportIncident from "../../features/responder/pages/ResponderReportIncident";
 
 import Unauthorized from "../../shared/components/Unauthorized";
 
@@ -66,6 +69,9 @@ export default function AppRoutes() {
             <Route path="/responder" element={<ResponderLayout />}>
               <Route index element={<MyAssignments />} />
               <Route path="updates" element={<IncidentUpdates />} />
+              <Route path="report" element={<ResponderMyReports/>}/>
+              <Route path="report/details" element={<ResponderReportDetails />} />
+              <Route path="report/new" element={<ResponderReportIncident />} />
             </Route>
           </Route>
         </Route>

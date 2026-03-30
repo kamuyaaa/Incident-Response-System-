@@ -1,12 +1,12 @@
 import PhoneFrame from "../../../shared/components/PhoneFrame";
-import "./ReportDetails.css";
+import "./ResponderReportDetails.css";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { MapContainer, Marker, TileLayer, useMap, useMapEvents } from "react-leaflet";
 import L from "leaflet";
-import ReporterMenu from "../components/ReporterMenu";
+import ResponderMenu from "../components/ResponderMenu";
 import { useAuth } from "../../../shared/hooks/useAuth";
-import reporterService from "../services/reporterService";
+import reporterService from "../../reporter/services/reporterService";
 
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
@@ -46,7 +46,7 @@ function formatCoordinates(lat, lng) {
   return `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
 }
 
-export default function ReportDetails() {
+export default function ResponderReportDetails() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { user } = useAuth();
@@ -310,7 +310,7 @@ export default function ReportDetails() {
 
       setShowConfirm(false);
       alert("Report submitted successfully");
-      navigate("/reporter/my-reports");
+      navigate("/responder/report?tab=mine");
     } catch (err) {
       alert(err.message);
     } finally {
@@ -340,14 +340,14 @@ export default function ReportDetails() {
   return (
     <PhoneFrame>
       <div className="report-details-page">
-        <ReporterMenu />
+        <ResponderMenu />
 
         <div className="report-details-card">
           <div className="report-details-header">
             <h1>Send Report</h1>
             <button
               className="close-btn"
-              onClick={() => navigate("/reporter/report")}
+              onClick={() => navigate("/responder/report/new")}
               aria-label="Close"
             >
               ✕
