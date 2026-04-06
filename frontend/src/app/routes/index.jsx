@@ -8,7 +8,7 @@ import ResponderLayout from "../../layouts/ResponderLayout";
 import ProtectedRoute from "./ProtectedRoute";
 import RoleRoute from "./RoleRoute";
 
-import Landing from "../../features/public/pages/Landing";
+import LandingPage from "../../pages/LandingPage";
 import Login from "../../features/auth/pages/Login";
 import Register from "../../features/auth/pages/Register";
 import ForgotPassword from "../../features/auth/pages/ForgotPassword";
@@ -38,7 +38,7 @@ export default function AppRoutes() {
       <Routes>
         {/* PUBLIC */}
         <Route element={<PublicLayout />}>
-          <Route path="/" element={<Landing />} />
+          <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
