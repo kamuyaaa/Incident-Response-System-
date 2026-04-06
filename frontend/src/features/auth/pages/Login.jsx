@@ -1,13 +1,14 @@
 import PhoneFrame from "../../../shared/components/PhoneFrame";
 import "./Login.css";
-import { useNavigate, Link } from "react-router-dom";
-import { useState } from "react";
+import { useNavigate, Link, useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
 import logo from "../../../assets/logo.png";
 import { useAuth } from "../../../shared/hooks/useAuth";
 import authService from "../services/authService";
 
 export default function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { login } = useAuth();
 
   const [form, setForm] = useState({
@@ -19,6 +20,24 @@ export default function Login() {
 
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    const demo = location.state?.demoLogin;
+    if (
+      demo &&
+      typeof demo.email === "string" &&
+      typeof demo.password === "string" &&
+      typeof demo.role === "string"
+    ) {
+      setForm((prev) => ({
+        ...prev,
+        email: demo.email,
+        password: demo.password,
+        role: demo.role,
+      }));
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location.state, location.pathname, navigate]);
 
   const handleChange = (e) => {
     const { id, type, value, checked } = e.target;
