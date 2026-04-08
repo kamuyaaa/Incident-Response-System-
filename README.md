@@ -1,130 +1,70 @@
-**Incident Response System**
+# Getting Started with Create React App
 
-An incident response management system developed collaboratively, featuring automated workflows, role-based access control, and a CI/CD pipeline for continuous integration and deployment.
+This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
-**Overview**
+## Available Scripts
 
-The Incident Response System is a collaborative platform designed to support structured and secure incident management.
-The system enables teams to:
-Report incidents in real time
-Assign and track responsibilities
-Monitor status progression
-Maintain accountability and secure data handling
-The project follows industry-standard DevOps practices by integrating a CI/CD pipeline to ensure reliability, code quality, and smooth deployment.
+In the project directory, you can run:
 
-**Features**
+### `npm start`
 
-Incident reporting and tracking
-Role-based access control (Administrator, Responder)
-Incident status updates and escalation
-Notification and alert mechanisms
-Secure data handling and authentication
-Automated testing and deployment (CI/CD)
+Runs the app in the development mode.\
+Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 
-**Technology Stack**
+The page will reload when you make changes.\
+You may also see any lint errors in the console.
 
-Layer	Technology Used
-Frontend	React
-Backend	Node.js / Express
-Database	MongoDB
-Version Control	Git & GitHub
-CI/CD	GitHub Actions
-Deployment	Render 
-CI/CD Pipeline
+### `npm test`
 
-This project implements a CI/CD (Continuous Integration and Continuous Deployment) pipeline using GitHub Actions to automate testing, validation, and deployment of the system.
+Launches the test runner in the interactive watch mode.\
+See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
 
-The goal of this pipeline is to reduce human error, maintain code quality, and ensure that the production system remains stable and reliable.
+### `npm run build`
 
-**Continuous Integration (CI)**
+Builds the app for production to the `build` folder.\
+It correctly bundles React in production mode and optimizes the build for the best performance.
 
-The Continuous Integration process ensures that every code change is automatically tested before being merged.
-When a developer:
-Pushes code to a branch
-Opens a Pull Request
-GitHub Actions automatically:
-Installs project dependencies
-Builds the application
-Runs automated tests
-Verifies that the project compiles successfully
-If any step fails, the merge is blocked.
-Additionally:
-The develop branch is protected to ensure integration remains stable.
-The main branch is protected to prevent untested or unstable code from reaching production.
-This guarantees that only validated code is merged.
+The build is minified and the filenames include the hashes.\
+Your app is ready to be deployed!
 
-**Continuous Deployment (CD)**
-After all tests pass successfully:
-Code merged into the main branch is automatically deployed.
-The production environment is updated without manual intervention.
+See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
 
-This ensures:
-Faster and consistent releases
-Reduced deployment errors
-A production system that is always synchronized with the latest stable version
-By automating deployment, the team avoids manual deployment mistakes and maintains system reliability.
+### `npm run eject`
 
-**Why This CI/CD Pipeline Matters**
+**Note: this is a one-way operation. Once you `eject`, you can't go back!**
 
-This pipeline:
-Enforces structured collaboration
-Detects errors early
-Prevents broken code from reaching production
-Maintains audit readiness
-Supports professional DevOps practices
+If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
 
-**Branching Strategy**
-Branch	Purpose
-main	Stable production-ready code
-develop	Integration and active development
-feature/*	Feature-specific development branches
+Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
 
-**Direct commits to main are not allowed.**
-All changes must go through Pull Requests and pass CI checks before merging.
+You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
 
-**Installation & Setup**
-1️⃣ Clone the Repository
-git clone https://github.com/kamuyaaa/Incident-Response-System-.git
-cd Incident-Response-System-
+## Learn More
 
-**Install Dependencies**
-Backend
-cd backend
-npm install
+You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
 
-Frontend
-cd frontend
-npm install
+To learn React, check out the [React documentation](https://reactjs.org/).
 
-**Configure Environment Variables**
-Create a .env file in the backend directory:
+### Code Splitting
 
-MONGO_URI=your_mongodb_connection_string
-PORT=5000
-JWT_SECRET=your_secret_key
+This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
 
-**Run the Application**
-Start Backend
-npm start
+### Analyzing the Bundle Size
 
-Start Frontend
-npm start
+This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
 
-**Development Workflow**
-Create a new feature branch
-Develop and commit changes
-Open a Pull Request to develop
-CI runs automated tests
-After approval and passing checks, merge
-main branch deploys automatically
+### Making a Progressive Web App
 
-**Future Improvements**
+This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
 
-Real-time incident notifications
-Dashboard analytics and reporting
-Improved mobile responsiveness
-Integration with external emergency response APIs
+### Advanced Configuration
 
-**License**
+This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
 
-This project is developed for academic and educational purposes.
+### Deployment
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+
+### `npm run build` fails to minify
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
